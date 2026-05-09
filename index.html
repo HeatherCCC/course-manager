@@ -10,6 +10,18 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;min-height:100vh;}
 .app{display:flex;height:100vh;overflow:hidden;}
+/* Loading overlay */
+#loading-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loading-overlay p{color:var(--text2);font-size:14px;}
+/* Sync status bar */
+.sync-bar{position:fixed;bottom:0;left:212px;right:0;padding:6px 16px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3);z-index:50;}
+.sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--text3);}
+.sync-dot.syncing{background:var(--warn);animation:pulse .8s infinite;}
+.sync-dot.ok{background:var(--accent3);}
+.sync-dot.err{background:var(--danger);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 /* Sidebar */
 .sb{width:212px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
 .logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);}
@@ -21,7 +33,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-seri
 .ni.on{background:rgba(124,109,250,.12);color:var(--accent);border-left-color:var(--accent);}
 .ni .ico{font-size:15px;width:20px;text-align:center;}
 /* Main */
-.main{flex:1;overflow-y:auto;}
+.main{flex:1;overflow-y:auto;padding-bottom:32px;}
 .pg{display:none;padding:24px 28px;}
 .pg.on{display:block;}
 .ph{margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;}
@@ -174,9 +186,44 @@ select option{background:var(--surface2);}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+/* Password screen */
+#pw-screen{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;align-items:center;justify-content:center;}
+.pw-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px 32px;width:340px;text-align:center;}
+.pw-box h2{font-size:18px;font-weight:700;margin-bottom:6px;}
+.pw-box p{font-size:13px;color:var(--text2);margin-bottom:24px;}
+.pw-box input{width:100%;padding:11px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:15px;font-family:inherit;outline:none;text-align:center;letter-spacing:3px;margin-bottom:12px;}
+.pw-box input:focus{border-color:var(--accent);}
+.pw-box input.shake{animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+.pw-err{font-size:12px;color:var(--danger);min-height:18px;margin-bottom:10px;}
 </style>
 </head>
 <body>
+
+<!-- Password screen -->
+<div id="pw-screen">
+  <div class="pw-box">
+    <div style="font-size:40px;margin-bottom:14px">🔒</div>
+    <h2>課程管理系統</h2>
+    <p>請輸入密碼以繼續</p>
+    <input type="password" id="pw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPw()">
+    <div class="pw-err" id="pw-err"></div>
+    <button class="btn bp" style="width:100%;padding:11px" onclick="checkPw()">進入</button>
+  </div>
+</div>
+<!-- Loading overlay -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <p>載入雲端資料中…</p>
+</div>
+
+<!-- Sync status bar -->
+<div class="sync-bar" id="sync-bar">
+  <div class="sync-dot" id="sync-dot"></div>
+  <span id="sync-txt">等待連線</span>
+  <span style="margin-left:auto;color:var(--text3)">資料同步至 Google Sheets</span>
+</div>
+
 <div class="app">
 
 <!-- Sidebar -->
@@ -318,7 +365,14 @@ select option{background:var(--surface2);}
 
 <!-- DASHBOARD -->
 <div class="pg" id="pg-dash">
-  <div class="ph"><div><h2>總覽報表</h2><p id="dash-date"></p></div></div>
+  <div class="ph">
+    <div><h2>總覽報表</h2><p id="dash-date"></p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn bg-btn sm" onclick="exportXlsx()" style="display:flex;align-items:center;gap:5px">
+        <span>📊</span> 匯出 Excel
+      </button>
+    </div>
+  </div>
   <div class="sg sg4">
     <div class="sc a"><div class="sl">班級數</div><div class="sv" id="d-cls">0</div></div>
     <div class="sc g"><div class="sl">學生總數</div><div class="sv" id="d-stu">0</div></div>
@@ -432,13 +486,12 @@ select option{background:var(--surface2);}
 // ============================================================
 // STATE
 // ============================================================
+const GS_URL = 'https://script.google.com/macros/s/AKfycbxPVGtrop_WXDxpUjVzZ1A8DSA9EIM0Vbf67Czs5FQKd2uaSqTwV9JgVDbHV_es4TVj/exec';
 const COLORS=['#7c6dfa','#fa6d8b','#6dfabd','#faac6d','#6db8fa','#fa6dde','#c4fa6d','#6dfaf0','#b06dfa','#fa9e6d'];
+
+// S is always the in-memory working copy (also cached in localStorage as fallback)
 let S = JSON.parse(localStorage.getItem('cms4')||'null') || {
-  classes:[],   // {id, name, subj, price, time, loc, color, note, schedule:[]} schedule=sorted YYYY-MM-DD array
-  students:[],  // {id, name, classId, phone, price, package, note}
-  att:{},       // {studentId: {'YYYY-MM-DD': 'present'|'absent'|'makeup'}}
-  pays:[],
-  nid:1
+  classes:[], students:[], att:{}, pays:[], nid:1
 };
 const T = new Date();
 let calY=T.getFullYear(), calM=T.getMonth();
@@ -446,10 +499,97 @@ let curClassId=null, curStuId=null, stuPrev='students';
 let sdY=T.getFullYear(), sdM=T.getMonth();
 let editCid=null, editSid=null;
 let selColor=COLORS[0];
-let spY=T.getFullYear(), spM=T.getMonth(), spDates=[];  // schedule picker state
+let spY=T.getFullYear(), spM=T.getMonth(), spDates=[];
 let attSid=null, attDs=null;
+let syncTimer=null;
 
-function save(){localStorage.setItem('cms4',JSON.stringify(S));}
+// ── Sync status bar ──────────────────────────────────────────
+function setSyncStatus(state, msg){
+  const bar = document.getElementById('sync-bar');
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-txt');
+  if(!bar) return;
+  txt.textContent = msg;
+  dot.className = 'sync-dot ' + state; // idle | syncing | ok | err
+}
+
+// ── Save: write to localStorage immediately, then push to Sheets ──
+function save(){
+  localStorage.setItem('cms4', JSON.stringify(S));
+  schedulePush();
+}
+
+function schedulePush(){
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushToSheets, 800); // debounce 0.8s
+}
+
+async function pushToSheets(){
+  setSyncStatus('syncing','同步中…');
+  // Flatten att object → array for Sheets
+  const attRows=[];
+  Object.entries(S.att).forEach(([sid,dates])=>{
+    Object.entries(dates).forEach(([date,status])=>{
+      attRows.push({studentId:+sid, date, status});
+    });
+  });
+  const payload={
+    classes: S.classes,
+    students: S.students,
+    att: attRows,
+    pays: S.pays
+  };
+  try{
+    const url = GS_URL + '?action=write&data=' + encodeURIComponent(JSON.stringify(payload));
+    const r = await fetch(url);
+    const j = await r.json();
+    if(j.ok) setSyncStatus('ok','已同步 ✓');
+    else setSyncStatus('err','同步失敗');
+  }catch(e){
+    setSyncStatus('err','網路錯誤，使用本機資料');
+  }
+}
+
+async function pullFromSheets(){
+  setSyncStatus('syncing','載入雲端資料…');
+  try{
+    const url = GS_URL + '?action=read';
+    const r = await fetch(url);
+    const j = await r.json();
+    if(j.error) throw new Error(j.error);
+    // Rebuild att object from flat array
+    const attObj={};
+    (j.att||[]).forEach(row=>{
+      const sid = +row.studentId;
+      if(!attObj[sid]) attObj[sid]={};
+      attObj[sid][row.date] = row.status;
+    });
+    // Parse numeric fields
+    const classes=(j.classes||[]).map(c=>({
+      ...c,
+      id:+c.id, price:+c.price||0,
+      schedule: c.schedule ? String(c.schedule).split(',').filter(Boolean) : []
+    }));
+    const students=(j.students||[]).map(s=>({
+      ...s,
+      id:+s.id, classId:+s.classId||null, price:+s.price||0, package:+s.package||0
+    }));
+    const pays=(j.pays||[]).map(p=>({
+      ...p,
+      id:+p.id, studentId:+p.studentId, amt:+p.amt||0, sess:+p.sess||0
+    }));
+    // Find max id for nid
+    const allIds=[...classes.map(x=>x.id),...students.map(x=>x.id),...pays.map(x=>x.id)];
+    const maxId = allIds.length ? Math.max(...allIds) : 0;
+    S = { classes, students, att:attObj, pays, nid: maxId+1 };
+    localStorage.setItem('cms4', JSON.stringify(S));
+    setSyncStatus('ok','已同步 ✓');
+    return true;
+  }catch(e){
+    setSyncStatus('err','無法連線，使用本機資料');
+    return false;
+  }
+}
 function pad(n){return String(n).padStart(2,'0');}
 function todayStr(){return `${T.getFullYear()}-${pad(T.getMonth()+1)}-${pad(T.getDate())}`;}
 function fmtD(d){if(!d)return'—';const x=new Date(d+'T00:00:00');return`${x.getFullYear()}/${pad(x.getMonth()+1)}/${pad(x.getDate())}`;}
@@ -1044,45 +1184,234 @@ function renderDash(){
 }
 
 // ============================================================
+// PASSWORD
+// ============================================================
+const PW_HASH = '2afb9a51422dd49e4535ed4cdd11cd087390318287735edfaca0f39840f25bfd'; // sha256 of your password
+
+async function sha256(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// Check if already authenticated this session
+if(sessionStorage.getItem('cms_auth')==='1'){
+  document.getElementById('pw-screen').style.display='none';
+}
+
+async function checkPw(){
+  const val = document.getElementById('pw-input').value;
+  const hash = await sha256(val);
+  if(hash === PW_HASH){
+    sessionStorage.setItem('cms_auth','1');
+    document.getElementById('pw-screen').style.display='none';
+    init();
+  } else {
+    const inp = document.getElementById('pw-input');
+    document.getElementById('pw-err').textContent='密碼錯誤，請再試一次';
+    inp.value='';
+    inp.classList.remove('shake');
+    void inp.offsetWidth; // reflow to restart animation
+    inp.classList.add('shake');
+  }
+}
+
+// ============================================================
 // INIT
 // ============================================================
-renderCal();
+async function init(){
+  // Show loading overlay
+  document.getElementById('loading-overlay').style.display='flex';
+  await pullFromSheets();
+  document.getElementById('loading-overlay').style.display='none';
+  renderCal();
 
-// Sample data
-if(!S.classes.length&&!S.students.length){
-  const btn=document.createElement('button');
-  btn.className='btn bg-btn';
-  btn.style.cssText='position:fixed;bottom:16px;right:16px;font-size:12px;z-index:99';
-  btn.textContent='📦 載入示範資料';
-  btn.onclick=()=>{
-    // Build schedule: irregular dates
-    function ds(y,m,d){return`${y}-${pad(m)}-${pad(d)}`;}
-    const y=T.getFullYear(),mn=T.getMonth()+1;
-    const prev=mn===1?12:mn-1, py=mn===1?y-1:y;
-    const next=mn===12?1:mn+1, ny=mn===12?y+1:y;
-    S.classes=[
-      {id:1,name:'國二數學班',subj:'數學',price:500,time:'15:00–16:30',loc:'教室A',color:'#7c6dfa',note:'',
-        schedule:[ds(py,prev,8),ds(py,prev,15),ds(py,prev,22),ds(py,prev,29),ds(y,mn,6),ds(y,mn,13),ds(y,mn,20),ds(y,mn,27),ds(ny,next,3),ds(ny,next,10)].sort()},
-      {id:2,name:'高二英文班',subj:'英文',price:600,time:'14:00–15:30',loc:'教室B',color:'#fa6d8b',note:'',
-        schedule:[ds(py,prev,5),ds(py,prev,12),ds(py,prev,19),ds(y,mn,2),ds(y,mn,9),ds(y,mn,16),ds(y,mn,23),ds(ny,next,6),ds(ny,next,13)].sort()},
-    ];
-    S.students=[
-      {id:3,name:'王小明',classId:1,phone:'0912-345678',price:0,package:8,note:''},
-      {id:4,name:'李美麗',classId:1,phone:'0923-456789',price:0,package:6,note:''},
-      {id:5,name:'張大偉',classId:2,phone:'0934-567890',price:0,package:10,note:''},
-      {id:6,name:'陳小花',classId:2,phone:'0945-678901',price:0,package:4,note:''},
-    ];
-    S.nid=7;
-    // Mark some attendance
-    const c1sched=S.classes[0].schedule;
-    const c2sched=S.classes[1].schedule;
-    S.att[3]={[c1sched[0]]:'present',[c1sched[1]]:'present',[c1sched[2]]:'absent',[c1sched[3]]:'present',[c1sched[4]]:'present'};
-    S.att[4]={[c1sched[0]]:'present',[c1sched[1]]:'absent',[c1sched[2]]:'present',[c1sched[3]]:'makeup',[c1sched[4]]:'present'};
-    S.att[5]={[c2sched[0]]:'present',[c2sched[1]]:'present',[c2sched[2]]:'present',[c2sched[3]]:'present',[c2sched[4]]:'present',[c2sched[5]]:'present',[c2sched[6]]:'present',[c2sched[7]]:'present',[c2sched[8]]:'present'};
-    S.att[6]={[c2sched[0]]:'present',[c2sched[1]]:'present',[c2sched[2]]:'present',[c2sched[3]]:'present'};
-    save();btn.remove();renderCal();
-  };
-  document.body.appendChild(btn);
+  // Sample data button (only if completely empty after pull)
+  if(!S.classes.length&&!S.students.length){
+    const btn=document.createElement('button');
+    btn.className='btn bg-btn';
+    btn.style.cssText='position:fixed;bottom:16px;right:16px;font-size:12px;z-index:99';
+    btn.textContent='📦 載入示範資料';
+    btn.onclick=()=>{
+      function ds(y,m,d){return`${y}-${pad(m)}-${pad(d)}`;}
+      const y=T.getFullYear(),mn=T.getMonth()+1;
+      const prev=mn===1?12:mn-1, py=mn===1?y-1:y;
+      const next=mn===12?1:mn+1, ny=mn===12?y+1:y;
+      S.classes=[
+        {id:1,name:'國二數學班',subj:'數學',price:500,time:'15:00–16:30',loc:'教室A',color:'#7c6dfa',note:'',
+          schedule:[ds(py,prev,8),ds(py,prev,15),ds(py,prev,22),ds(py,prev,29),ds(y,mn,6),ds(y,mn,13),ds(y,mn,20),ds(y,mn,27),ds(ny,next,3),ds(ny,next,10)].sort()},
+        {id:2,name:'高二英文班',subj:'英文',price:600,time:'14:00–15:30',loc:'教室B',color:'#fa6d8b',note:'',
+          schedule:[ds(py,prev,5),ds(py,prev,12),ds(py,prev,19),ds(y,mn,2),ds(y,mn,9),ds(y,mn,16),ds(y,mn,23),ds(ny,next,6),ds(ny,next,13)].sort()},
+      ];
+      S.students=[
+        {id:3,name:'王小明',classId:1,phone:'0912-345678',price:0,package:8,note:''},
+        {id:4,name:'李美麗',classId:1,phone:'0923-456789',price:0,package:6,note:''},
+        {id:5,name:'張大偉',classId:2,phone:'0934-567890',price:0,package:10,note:''},
+        {id:6,name:'陳小花',classId:2,phone:'0945-678901',price:0,package:4,note:''},
+      ];
+      S.nid=7;
+      const c1sched=S.classes[0].schedule;
+      const c2sched=S.classes[1].schedule;
+      S.att[3]={[c1sched[0]]:'present',[c1sched[1]]:'present',[c1sched[2]]:'absent',[c1sched[3]]:'present',[c1sched[4]]:'present'};
+      S.att[4]={[c1sched[0]]:'present',[c1sched[1]]:'absent',[c1sched[2]]:'present',[c1sched[3]]:'makeup',[c1sched[4]]:'present'};
+      S.att[5]={[c2sched[0]]:'present',[c2sched[1]]:'present',[c2sched[2]]:'present',[c2sched[3]]:'present',[c2sched[4]]:'present',[c2sched[5]]:'present',[c2sched[6]]:'present',[c2sched[7]]:'present',[c2sched[8]]:'present'};
+      S.att[6]={[c2sched[0]]:'present',[c2sched[1]]:'present',[c2sched[2]]:'present',[c2sched[3]]:'present'};
+      save();btn.remove();renderCal();
+    };
+    document.body.appendChild(btn);
+  }
+}
+// Only auto-init if already authenticated this session
+if(sessionStorage.getItem('cms_auth')==='1') init();
+
+// ============================================================
+// EXPORT TO EXCEL (SheetJS)
+// ============================================================
+function exportXlsx(){
+  if(typeof XLSX==='undefined'){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=()=>doExport();
+    document.head.appendChild(s);
+  }else{doExport();}
+}
+
+function doExport(){
+  const wb=XLSX.utils.book_new();
+  const exportDate=new Date().toLocaleDateString('zh-TW');
+
+  // ── 1. 學生總覽 ──────────────────────────────────────────
+  const stuRows=[['學生姓名','班級','電話','套票總購入','已上堂數','缺席堂數','補課堂數','剩餘堂數','預計到期日期','預計到期第幾堂','狀態','備註']];
+  S.students.forEach(s=>{
+    const c=S.classes.find(x=>x.id===s.classId);
+    const att=stuAtt(s.id);
+    const used=consumed(s.id);
+    const absent=Object.values(att).filter(v=>v==='absent').length;
+    const makeup=Object.values(att).filter(v=>v==='makeup').length;
+    const rem=remaining(s.id);
+    const ei=expiryInfo(s.id);
+    const st=stuStatus(s.id);
+    const stLabel=st==='out'?'已用完':st==='low'?'即將用完':st==='ok'?'正常':'無套票';
+    stuRows.push([
+      s.name,
+      c?.name||'未分配',
+      s.phone||'',
+      s.package||0,
+      used,
+      absent,
+      makeup,
+      rem!==null?rem:'',
+      ei.date||'',
+      ei.date?getSchedIndex(s.id,ei.date):'',
+      stLabel,
+      s.note||''
+    ]);
+  });
+  const ws1=XLSX.utils.aoa_to_sheet(stuRows);
+  ws1['!cols']=[{wch:12},{wch:14},{wch:14},{wch:10},{wch:8},{wch:8},{wch:8},{wch:8},{wch:16},{wch:12},{wch:10},{wch:16}];
+  styleHeader(ws1, stuRows[0].length);
+  XLSX.utils.book_append_sheet(wb,ws1,'學生總覽');
+
+  // ── 2. 財務報表 ───────────────────────────────────────────
+  const finRows=[['繳費日期','學生姓名','班級','方案名稱','金額（元）','購入堂數','備註']];
+  const paysByClass={};
+  S.pays.forEach(p=>{
+    const s=S.students.find(x=>x.id===p.sid);
+    const c=s&&S.classes.find(x=>x.id===s.classId);
+    const cname=c?.name||'未分配';
+    if(!paysByClass[cname])paysByClass[cname]=[];
+    paysByClass[cname].push([p.date||'',s?.name||'已刪除',cname,p.plan||'',p.amt||0,p.sess||0,p.note||'']);
+  });
+  // Sort by date
+  [...S.pays].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).forEach(p=>{
+    const s=S.students.find(x=>x.id===p.sid);
+    const c=s&&S.classes.find(x=>x.id===s.classId);
+    finRows.push([p.date||'',s?.name||'已刪除',c?.name||'—',p.plan||'',p.amt||0,p.sess||0,p.note||'']);
+  });
+  // Summary row
+  const totalAmt=S.pays.reduce((a,p)=>a+(p.amt||0),0);
+  const totalSess=S.pays.reduce((a,p)=>a+(p.sess||0),0);
+  finRows.push(['','','','合計',totalAmt,totalSess,'']);
+  const ws2=XLSX.utils.aoa_to_sheet(finRows);
+  ws2['!cols']=[{wch:12},{wch:12},{wch:14},{wch:14},{wch:10},{wch:10},{wch:18}];
+  styleHeader(ws2, finRows[0].length);
+  // Bold last row (total)
+  const totalRowIdx=finRows.length;
+  for(let c=0;c<finRows[0].length;c++){
+    const addr=XLSX.utils.encode_cell({r:totalRowIdx-1,c});
+    if(!ws2[addr])ws2[addr]={t:'s',v:''};
+    ws2[addr].s={font:{bold:true}};
+  }
+  XLSX.utils.book_append_sheet(wb,ws2,'財務報表');
+
+  // ── 3. 各班出缺勤明細 ─────────────────────────────────────
+  S.classes.forEach(cls=>{
+    const stu=clsStu(cls.id);
+    if(!stu.length)return;
+    const sched=(cls.schedule||[]).sort();
+    // Header: 學生 | 套票 | 剩餘 | date1 | date2 | ...
+    const header=['學生姓名','套票總數','剩餘堂數',...sched.map(d=>fmtD(d))];
+    const rows=[header];
+    stu.forEach(s=>{
+      const att=stuAtt(s.id);
+      const rem=remaining(s.id);
+      const attCols=sched.map(d=>{
+        const v=att[d];
+        if(v==='present')return'出席';
+        if(v==='absent')return'缺席';
+        if(v==='makeup')return'補課';
+        if(d<todayStr())return'';
+        return '排定';
+      });
+      rows.push([s.name,s.package||0,rem!==null?rem:'',...attCols]);
+    });
+    // Stats row
+    const statsRow=['出席人次','',''];
+    sched.forEach(d=>{
+      const count=stu.filter(s=>stuAtt(s.id)[d]==='present'||stuAtt(s.id)[d]==='makeup').length;
+      statsRow.push(count+'/'+stu.length);
+    });
+    rows.push(statsRow);
+    const wsN=XLSX.utils.aoa_to_sheet(rows);
+    const colWidths=[{wch:12},{wch:8},{wch:8},...sched.map(()=>({wch:13}))];
+    wsN['!cols']=colWidths;
+    styleHeader(wsN, header.length);
+    // Truncate sheet name to 31 chars (Excel limit)
+    XLSX.utils.book_append_sheet(wb,wsN,cls.name.slice(0,28)+'出缺勤');
+  });
+
+  // ── 4. 課表總覽 ────────────────────────────────────────────
+  const schedRows=[['班級名稱','科目','上課時間','地點','每堂費用','課表日期（所有）']];
+  S.classes.forEach(c=>{
+    schedRows.push([
+      c.name,
+      c.subj||'',
+      c.time||'',
+      c.loc||'',
+      c.price||0,
+      (c.schedule||[]).map(d=>fmtD(d)).join('、')
+    ]);
+  });
+  const ws4=XLSX.utils.aoa_to_sheet(schedRows);
+  ws4['!cols']=[{wch:16},{wch:10},{wch:14},{wch:10},{wch:10},{wch:80}];
+  styleHeader(ws4, schedRows[0].length);
+  XLSX.utils.book_append_sheet(wb,ws4,'課表總覽');
+
+  // ── Download ───────────────────────────────────────────────
+  const fname=`課程管理_${exportDate.replace(/\//g,'')}.xlsx`;
+  XLSX.writeFile(wb,fname);
+}
+
+function styleHeader(ws, ncols){
+  // Bold + background for first row
+  for(let c=0;c<ncols;c++){
+    const addr=XLSX.utils.encode_cell({r:0,c});
+    if(!ws[addr])ws[addr]={t:'s',v:''};
+    ws[addr].s={
+      font:{bold:true,color:{rgb:'FFFFFF'}},
+      fill:{fgColor:{rgb:'4A3FBF'}},
+      alignment:{horizontal:'center'}
+    };
+  }
 }
 </script>
 </body>
