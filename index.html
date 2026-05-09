@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課程管理系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0f13;--surface:#1a1a22;--surface2:#22222e;--border:#2e2e3e;--accent:#7c6dfa;--accent3:#6dfabd;--text:#e8e8f0;--text2:#8888aa;--text3:#555570;--warn:#faac6d;--danger:#fa6d6d;--r:12px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;min-height:100vh;}
+.app{display:flex;height:100vh;overflow:hidden;}
+/* Sidebar */
+.sb{width:212px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+.logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);}
+.logo h1{font-size:15px;font-weight:700;color:var(--accent);}
+.logo p{font-size:11px;color:var(--text3);margin-top:3px;}
+.nav{padding:10px 0;flex:1;}
+.ni{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;border-left:3px solid transparent;}
+.ni:hover{background:var(--surface2);color:var(--text);}
+.ni.on{background:rgba(124,109,250,.12);color:var(--accent);border-left-color:var(--accent);}
+.ni .ico{font-size:15px;width:20px;text-align:center;}
+/* Main */
+.main{flex:1;overflow-y:auto;}
+.pg{display:none;padding:24px 28px;}
+.pg.on{display:block;}
+.ph{margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;}
+.ph h2{font-size:20px;font-weight:700;}
+.ph p{color:var(--text2);font-size:13px;margin-top:3px;}
+/* Card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:14px;}
+/* Stats */
+.sg{display:grid;gap:11px;margin-bottom:20px;}
+.sg4{grid-template-columns:repeat(4,1fr);}
+.sg3{grid-template-columns:repeat(3,1fr);}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.sl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;}
+.sv{font-size:24px;font-weight:700;font-family:'DM Mono',monospace;margin:4px 0 2px;}
+.ss{font-size:11px;color:var(--text2);}
+.sc.a .sv{color:var(--accent);} .sc.g .sv{color:var(--accent3);} .sc.r .sv{color:var(--danger);} .sc.w .sv{color:var(--warn);}
+/* Buttons */
+.btn{padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:all .15s;white-space:nowrap;}
+.bp{background:var(--accent);color:#fff;} .bp:hover{background:#9080ff;}
+.bg-btn{background:transparent;color:var(--text2);border:1px solid var(--border);} .bg-btn:hover{background:var(--surface2);color:var(--text);}
+.bd{background:transparent;color:var(--danger);border:1px solid var(--danger);}
+.sm{padding:4px 9px;font-size:12px;}
+/* Table */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:9px 13px;color:var(--text3);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);}
+td{padding:10px 13px;border-bottom:1px solid rgba(46,46,62,.5);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(124,109,250,.04);}
+/* Badge */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;}
+.ba{background:rgba(124,109,250,.12);color:var(--accent);}
+.bgg{background:rgba(109,250,189,.12);color:var(--accent3);}
+.brr{background:rgba(250,109,109,.12);color:var(--danger);}
+.bww{background:rgba(250,172,109,.12);color:var(--warn);}
+/* Form */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fi{display:flex;flex-direction:column;gap:5px;}
+.fi.full{grid-column:1/-1;}
+label{font-size:12px;color:var(--text2);font-weight:500;}
+input,select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;width:100%;}
+input:focus,select:focus{border-color:var(--accent);}
+select option{background:var(--surface2);}
+.tip{font-size:11px;color:var(--text3);}
+/* Modal */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:100;align-items:center;justify-content:center;}
+.mo.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;width:500px;max-width:93vw;max-height:90vh;overflow-y:auto;}
+.modal.wide{width:680px;}
+.mhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.mhd h3{font-size:16px;font-weight:700;}
+.mclose{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px;line-height:1;}
+.mft{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);}
+/* Month nav */
+.mnav{display:flex;gap:5px;align-items:center;}
+.mnav button{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px 13px;cursor:pointer;font-size:14px;font-family:inherit;}
+.mnav button:hover{background:var(--border);}
+.mlabel{font-size:15px;font-weight:700;min-width:106px;text-align:center;}
+
+/* ===== MAIN CALENDAR ===== */
+.cal-outer{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.cal-heads{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface2);}
+.cal-hcell{text-align:center;padding:9px 4px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);}
+.cal-cell{background:var(--surface);min-height:94px;padding:6px;display:flex;flex-direction:column;gap:3px;cursor:pointer;transition:background .1s;}
+.cal-cell:hover{background:#1e1e2a;}
+.cal-cell.other{background:#161619;cursor:default;}
+.cal-cell.other:hover{background:#161619;}
+.cal-cell.today{background:#1c1a2e;}
+.cal-dn{font-size:12px;font-weight:600;color:var(--text3);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:6px;}
+.cal-cell.today .cal-dn{color:var(--accent);background:rgba(124,109,250,.2);}
+.chip{display:flex;align-items:center;gap:4px;padding:3px 7px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;border:none;text-align:left;width:100%;overflow:hidden;transition:filter .12s;}
+.chip:hover{filter:brightness(1.3);}
+.chip .cn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.chip .ct{font-size:10px;opacity:.7;flex-shrink:0;}
+.cal-hint{font-size:10px;color:var(--text3);margin-top:auto;opacity:0;transition:opacity .15s;}
+.cal-cell:hover .cal-hint{opacity:1;}
+.legend{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:12px;}
+.leg{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+
+/* ===== SCHEDULE PICKER (inside class modal) ===== */
+.sched-picker{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:4px;}
+.sp-toolbar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.sp-label{font-size:13px;font-weight:600;min-width:90px;text-align:center;}
+.sp-heads{display:grid;grid-template-columns:repeat(7,1fr);}
+.sp-hcell{text-align:center;padding:6px 2px;font-size:10px;color:var(--text3);font-weight:600;}
+.sp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:6px;}
+.sp-day{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;border:1px solid transparent;transition:all .12s;font-family:'DM Mono',monospace;font-weight:500;}
+.sp-day:hover{background:var(--surface2);border-color:var(--border);}
+.sp-day.empty{cursor:default;opacity:0;}
+.sp-day.other{opacity:.3;cursor:default;}
+.sp-day.selected{background:var(--accent);color:#fff;border-color:var(--accent);}
+.sp-day.today-d{border-color:var(--accent3);}
+.sp-selected-list{padding:10px 12px;border-top:1px solid var(--border);min-height:36px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+.sp-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(124,109,250,.15);color:var(--accent);border-radius:5px;padding:3px 7px;font-size:11px;font-family:'DM Mono',monospace;}
+.sp-tag button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;line-height:1;padding:0;margin-left:2px;}
+.sp-empty-hint{font-size:12px;color:var(--text3);}
+
+/* Color picker */
+.cpick{display:flex;gap:7px;flex-wrap:wrap;}
+.cswatch{width:24px;height:24px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .12s;}
+.cswatch.on{border-color:#fff;transform:scale(1.18);}
+
+/* Student row */
+.sr{display:flex;align-items:center;gap:10px;}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.ra{display:flex;gap:6px;}
+
+/* Progress */
+.pb{background:var(--surface2);border-radius:4px;height:7px;overflow:hidden;}
+.pf{height:100%;border-radius:4px;transition:width .4s;background:var(--accent);}
+.pf.g{background:var(--accent3);} .pf.w{background:var(--warn);} .pf.r{background:var(--danger);}
+
+/* Alert */
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:9px;display:flex;align-items:center;gap:9px;}
+.alert.w{background:rgba(250,172,109,.1);border:1px solid rgba(250,172,109,.3);color:var(--warn);}
+.alert.r{background:rgba(250,109,109,.1);border:1px solid rgba(250,109,109,.3);color:var(--danger);}
+
+/* Back button */
+.back{display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;cursor:pointer;color:var(--text2);font-size:13px;padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;}
+.back:hover{background:var(--surface2);color:var(--text);}
+
+/* Detail */
+.dhero{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.dav{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:700;color:#fff;flex-shrink:0;}
+.dname{font-size:19px;font-weight:700;}
+.dsub{font-size:13px;color:var(--text2);margin-top:3px;}
+.dg{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+.dst{background:var(--surface2);border-radius:10px;padding:12px;text-align:center;}
+.dsv{font-size:21px;font-weight:700;font-family:'DM Mono',monospace;}
+.dsl{font-size:11px;color:var(--text3);margin-top:3px;}
+
+/* Mini calendar for detail */
+.mc{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.mc-head{text-align:center;font-size:10px;color:var(--text3);padding:3px;}
+.md{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;border:1px solid transparent;}
+.md.empty{cursor:default;}
+.md.sched{cursor:pointer;background:var(--surface2);border-color:var(--border);}
+.md.sched:hover{border-color:var(--accent);}
+.md.present{background:rgba(109,250,189,.2);color:var(--accent3);cursor:pointer;}
+.md.absent{background:rgba(250,109,109,.2);color:var(--danger);cursor:pointer;}
+.md.makeup{background:rgba(250,172,109,.2);color:var(--warn);cursor:pointer;}
+.md.today-d{border-color:var(--accent)!important;}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3);}
+.empty-state .ei{font-size:36px;margin-bottom:10px;}
+.tb{display:flex;gap:9px;align-items:center;margin-bottom:13px;flex-wrap:wrap;}
+.tr{margin-left:auto;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- Sidebar -->
+<div class="sb">
+  <div class="logo"><h1>📚 課程管理</h1><p>班級 · 課表 · 學費</p></div>
+  <nav class="nav">
+    <div class="ni on" onclick="nav('cal')"><span class="ico">📅</span><span>課程月曆</span></div>
+    <div class="ni" onclick="nav('classes')"><span class="ico">🏫</span><span>班級管理</span></div>
+    <div class="ni" onclick="nav('students')"><span class="ico">👤</span><span>學生管理</span></div>
+    <div class="ni" onclick="nav('tuition')"><span class="ico">💰</span><span>學費管理</span></div>
+    <div class="ni" onclick="nav('dash')"><span class="ico">📊</span><span>總覽報表</span></div>
+  </nav>
+</div>
+
+<div class="main">
+
+<!-- CALENDAR PAGE -->
+<div class="pg on" id="pg-cal">
+  <div class="ph">
+    <div><h2>課程月曆</h2><p>顯示所有班級的上課日，點擊可查看班級學生</p></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div class="mnav">
+        <button onclick="calStep(-1)">‹</button>
+        <span class="mlabel" id="cal-label"></span>
+        <button onclick="calStep(1)">›</button>
+      </div>
+      <button class="btn bp sm" onclick="nav('classes')">＋ 新增班級</button>
+    </div>
+  </div>
+  <div class="legend" id="cal-legend"></div>
+  <div class="cal-outer">
+    <div class="cal-heads" id="cal-heads"></div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+</div>
+
+<!-- CLASS DETAIL (drill-in from calendar) -->
+<div class="pg" id="pg-cls-detail">
+  <button class="back" onclick="nav('cal')">← 返回月曆</button>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+    <div id="cdot" style="width:13px;height:13px;border-radius:50%"></div>
+    <div style="flex:1"><div id="ctitle" style="font-size:19px;font-weight:700"></div><div id="csub" style="font-size:13px;color:var(--text2);margin-top:2px"></div></div>
+    <button class="btn bg-btn sm" onclick="openEditClass(curClassId)">編輯班級</button>
+  </div>
+  <div class="sg sg4" id="c-stats"></div>
+  <div class="card" style="padding:0">
+    <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-weight:600;font-size:14px">學生清單</span>
+      <button class="btn bp sm" onclick="openAddStudent(curClassId)">＋ 新增學生</button>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>學生</th><th>已上</th><th>剩餘堂</th><th>預計到期堂</th><th>狀態</th><th>操作</th></tr></thead>
+      <tbody id="c-tbody"></tbody>
+    </table></div>
+    <div id="c-empty" class="empty-state" style="display:none"><div class="ei">👤</div><p>此班級尚無學生</p></div>
+  </div>
+</div>
+
+<!-- STUDENT DETAIL -->
+<div class="pg" id="pg-stu-detail">
+  <button class="back" id="stu-back" onclick="backFromStu()">← 返回</button>
+  <div class="dhero">
+    <div class="dav" id="sd-av"></div>
+    <div style="flex:1"><div class="dname" id="sd-name"></div><div class="dsub" id="sd-sub"></div></div>
+    <button class="btn bg-btn sm" id="sd-edit">編輯學生</button>
+  </div>
+  <div class="dg" id="sd-stats"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:13px">
+        <span style="font-weight:600;font-size:14px">出缺勤記錄</span>
+        <div class="mnav" style="gap:4px">
+          <button onclick="sdStep(-1)" style="padding:3px 10px;font-size:12px">‹</button>
+          <span id="sd-mlabel" style="font-size:13px;font-weight:600;min-width:74px;text-align:center"></span>
+          <button onclick="sdStep(1)" style="padding:3px 10px;font-size:12px">›</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:9px;font-size:12px">
+        <span><span style="color:var(--accent3)">●</span> 出席</span>
+        <span><span style="color:var(--danger)">●</span> 缺席</span>
+        <span><span style="color:var(--warn)">●</span> 補課</span>
+        <span style="color:var(--text3)">□ 排定</span>
+      </div>
+      <div class="mc" id="sd-mh"></div>
+      <div class="mc" id="sd-mg" style="margin-top:3px"></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div style="font-weight:600;font-size:14px;margin-bottom:11px">套票狀態</div>
+        <div id="sd-pkg"></div>
+      </div>
+      <div class="card">
+        <div style="font-weight:600;font-size:14px;margin-bottom:11px">繳費紀錄</div>
+        <div id="sd-pays"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLASSES PAGE -->
+<div class="pg" id="pg-classes">
+  <div class="ph">
+    <div><h2>班級管理</h2><p>設定課表（可在月曆中點選上課日期）</p></div>
+    <button class="btn bp" onclick="openAddClass()">＋ 新增班級</button>
+  </div>
+  <div id="class-list"></div>
+  <div id="class-empty" class="empty-state card" style="display:none"><div class="ei">🏫</div><p>尚無班級，點擊「新增班級」開始！</p></div>
+</div>
+
+<!-- STUDENTS PAGE -->
+<div class="pg" id="pg-students">
+  <div class="ph">
+    <div><h2>學生管理</h2></div>
+    <button class="btn bp" onclick="openAddStudent(null)">＋ 新增學生</button>
+  </div>
+  <div class="tb">
+    <input type="text" id="s-search" placeholder="🔍 搜尋姓名…" style="width:190px" oninput="renderStuList()">
+    <select id="s-filter" onchange="renderStuList()" style="width:150px"><option value="">全部班級</option></select>
+  </div>
+  <div class="card" style="padding:0">
+    <table><thead><tr><th>學生</th><th>班級</th><th>已上</th><th>剩餘堂</th><th>預計到期</th><th>狀態</th><th>操作</th></tr></thead>
+    <tbody id="all-tbody"></tbody></table>
+    <div id="all-empty" class="empty-state" style="display:none"><div class="ei">👤</div><p>尚無學生</p></div>
+  </div>
+</div>
+
+<!-- TUITION PAGE -->
+<div class="pg" id="pg-tuition">
+  <div class="ph">
+    <div><h2>學費管理</h2></div>
+    <button class="btn bp" onclick="openAddPay()">＋ 新增繳費</button>
+  </div>
+  <div class="card" style="padding:0">
+    <table><thead><tr><th>日期</th><th>學生</th><th>班級</th><th>方案</th><th>金額</th><th>購入堂數</th><th>備註</th></tr></thead>
+    <tbody id="pay-tbody"></tbody></table>
+    <div id="pay-empty" class="empty-state" style="display:none"><div class="ei">💰</div><p>尚無繳費記錄</p></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="pg" id="pg-dash">
+  <div class="ph"><div><h2>總覽報表</h2><p id="dash-date"></p></div></div>
+  <div class="sg sg4">
+    <div class="sc a"><div class="sl">班級數</div><div class="sv" id="d-cls">0</div></div>
+    <div class="sc g"><div class="sl">學生總數</div><div class="sv" id="d-stu">0</div></div>
+    <div class="sc w"><div class="sl">即將用完</div><div class="sv" id="d-low">0</div><div class="ss">≤3堂剩餘</div></div>
+    <div class="sc r"><div class="sl">已用完</div><div class="sv" id="d-out">0</div></div>
+  </div>
+  <div id="dash-alerts"></div>
+  <div class="card">
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:13px">各班級</div>
+    <div id="dash-rows"></div>
+  </div>
+</div>
+
+</div><!-- .main -->
+</div><!-- .app -->
+
+<!-- ===== MODAL: CLASS ===== -->
+<div class="mo" id="mo-class">
+<div class="modal wide">
+  <div class="mhd"><h3 id="mc-title">新增班級</h3><button class="mclose" onclick="closeM('mo-class')">×</button></div>
+  <div class="fg" style="margin-bottom:14px">
+    <div class="fi full"><label>班級名稱 *</label><input type="text" id="c-name" placeholder="例：國二數學班、高二英文班"></div>
+    <div class="fi"><label>科目</label><input type="text" id="c-subj" placeholder="數學、英文…"></div>
+    <div class="fi"><label>每堂費用（元）</label><input type="number" id="c-price" placeholder="500"></div>
+    <div class="fi"><label>上課時間</label><input type="text" id="c-time" placeholder="例：15:00–16:30"></div>
+    <div class="fi"><label>地點</label><input type="text" id="c-loc" placeholder="教室A"></div>
+    <div class="fi full">
+      <label>班級顏色</label>
+      <div class="cpick" id="cpick"></div>
+    </div>
+    <div class="fi full"><label>備註</label><input type="text" id="c-note" placeholder="其他說明"></div>
+  </div>
+  <!-- Schedule Picker -->
+  <div style="margin-bottom:6px">
+    <label style="font-size:13px;font-weight:600;color:var(--text)">📅 課表設定</label>
+    <div class="tip" style="margin-top:4px">在月曆上點選上課日期（可跨月份），點擊已選的日期可取消</div>
+  </div>
+  <div class="sched-picker">
+    <div class="sp-toolbar">
+      <button onclick="spStep(-1)" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 11px;cursor:pointer;font-size:13px;font-family:inherit">‹</button>
+      <span class="sp-label" id="sp-label"></span>
+      <button onclick="spStep(1)" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 11px;cursor:pointer;font-size:13px;font-family:inherit">›</button>
+      <span style="font-size:12px;color:var(--text3);margin-left:8px">已選 <span id="sp-count" style="color:var(--accent);font-weight:700">0</span> 天</span>
+    </div>
+    <div class="sp-heads" id="sp-heads"></div>
+    <div class="sp-grid" id="sp-grid"></div>
+    <div class="sp-selected-list" id="sp-tags"></div>
+  </div>
+  <div class="mft">
+    <button class="btn bg-btn" onclick="closeM('mo-class')">取消</button>
+    <button class="btn bp" onclick="saveClass()">儲存班級</button>
+  </div>
+</div>
+</div>
+
+<!-- ===== MODAL: STUDENT ===== -->
+<div class="mo" id="mo-stu">
+<div class="modal">
+  <div class="mhd"><h3 id="ms-title">新增學生</h3><button class="mclose" onclick="closeM('mo-stu')">×</button></div>
+  <div class="fg">
+    <div class="fi"><label>學生姓名 *</label><input type="text" id="s-name" placeholder="王小明"></div>
+    <div class="fi"><label>所屬班級</label><select id="s-cls"></select></div>
+    <div class="fi"><label>電話</label><input type="text" id="s-phone" placeholder="家長聯絡電話"></div>
+    <div class="fi"><label>每堂費用（元）</label><input type="number" id="s-price" placeholder="留空沿用班級設定"><span class="tip">留空則套用班級設定</span></div>
+    <div class="fi"><label>套票堂數（購入）</label><input type="number" id="s-pkg" placeholder="10"></div>
+    <div class="fi"><label>備註</label><input type="text" id="s-note" placeholder=""></div>
+  </div>
+  <div style="margin-top:12px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.7">
+    💡 <b style="color:var(--text)">到期邏輯：</b>每堂課點名出席或補課各扣 1 堂；請假（缺席）不扣堂，自動順延到下一堂課。套票堂數用完即到期。
+  </div>
+  <div class="mft">
+    <button class="btn bg-btn" onclick="closeM('mo-stu')">取消</button>
+    <button class="btn bp" onclick="saveStu()">儲存</button>
+  </div>
+</div>
+</div>
+
+<!-- ===== MODAL: PAYMENT ===== -->
+<div class="mo" id="mo-pay">
+<div class="modal">
+  <div class="mhd"><h3>新增繳費記錄</h3><button class="mclose" onclick="closeM('mo-pay')">×</button></div>
+  <div class="fg">
+    <div class="fi"><label>學生 *</label><select id="p-stu"></select></div>
+    <div class="fi"><label>繳費日期</label><input type="date" id="p-date"></div>
+    <div class="fi"><label>方案名稱</label><input type="text" id="p-plan" placeholder="10堂套票"></div>
+    <div class="fi"><label>金額（元）</label><input type="number" id="p-amt"></div>
+    <div class="fi full"><label>購入堂數</label><input type="number" id="p-sess" placeholder="10"><span class="tip">購入堂數會累加到學生的剩餘套票堂數</span></div>
+    <div class="fi full"><label>備註</label><input type="text" id="p-note"></div>
+  </div>
+  <div class="mft">
+    <button class="btn bg-btn" onclick="closeM('mo-pay')">取消</button>
+    <button class="btn bp" onclick="savePay()">儲存</button>
+  </div>
+</div>
+</div>
+
+<!-- ===== MODAL: ATTENDANCE ===== -->
+<div class="mo" id="mo-att">
+<div class="modal" style="width:280px">
+  <div class="mhd"><h3 id="att-title">記錄出缺勤</h3><button class="mclose" onclick="closeM('mo-att')">×</button></div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <button class="btn bg-btn" onclick="setAtt('present')" style="padding:12px">✅ 出席（扣 1 堂）</button>
+    <button class="btn bg-btn" onclick="setAtt('absent')" style="padding:12px;color:var(--danger);border-color:var(--danger)">❌ 缺席（不扣堂，自動順延）</button>
+    <button class="btn bg-btn" onclick="setAtt('makeup')" style="padding:12px;color:var(--warn);border-color:var(--warn)">🔄 補課（扣 1 堂）</button>
+    <button class="btn bg-btn" onclick="setAtt(null)" style="padding:12px">🗑 清除此筆記錄</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const COLORS=['#7c6dfa','#fa6d8b','#6dfabd','#faac6d','#6db8fa','#fa6dde','#c4fa6d','#6dfaf0','#b06dfa','#fa9e6d'];
+let S = JSON.parse(localStorage.getItem('cms4')||'null') || {
+  classes:[],   // {id, name, subj, price, time, loc, color, note, schedule:[]} schedule=sorted YYYY-MM-DD array
+  students:[],  // {id, name, classId, phone, price, package, note}
+  att:{},       // {studentId: {'YYYY-MM-DD': 'present'|'absent'|'makeup'}}
+  pays:[],
+  nid:1
+};
+const T = new Date();
+let calY=T.getFullYear(), calM=T.getMonth();
+let curClassId=null, curStuId=null, stuPrev='students';
+let sdY=T.getFullYear(), sdM=T.getMonth();
+let editCid=null, editSid=null;
+let selColor=COLORS[0];
+let spY=T.getFullYear(), spM=T.getMonth(), spDates=[];  // schedule picker state
+let attSid=null, attDs=null;
+
+function save(){localStorage.setItem('cms4',JSON.stringify(S));}
+function pad(n){return String(n).padStart(2,'0');}
+function todayStr(){return `${T.getFullYear()}-${pad(T.getMonth()+1)}-${pad(T.getDate())}`;}
+function fmtD(d){if(!d)return'—';const x=new Date(d+'T00:00:00');return`${x.getFullYear()}/${pad(x.getMonth()+1)}/${pad(x.getDate())}`;}
+
+// ============================================================
+// CORE LOGIC: session-based expiry
+// ============================================================
+// Returns sorted array of scheduled dates for a class
+function classSched(cid){
+  const c=S.classes.find(x=>x.id===cid);
+  return c?(c.schedule||[]).slice().sort():[];
+}
+// Get all students in a class
+function clsStu(cid){return S.students.filter(s=>s.classId===cid);}
+// Attendance map for a student
+function stuAtt(sid){return S.att[sid]||{};}
+
+// For a student: count sessions where they were present or makeup (= sessions consumed)
+function consumed(sid){
+  return Object.values(stuAtt(sid)).filter(v=>v==='present'||v==='makeup').length;
+}
+// Remaining tickets
+function remaining(sid){
+  const s=S.students.find(x=>x.id===sid);
+  if(!s||!s.package)return null;
+  return Math.max(0, s.package - consumed(sid));
+}
+
+// Compute the "expiry session date": the Nth scheduled class date where the last ticket is consumed.
+// Rules:
+//   - iterate over class schedule dates in order
+//   - if student was present/makeup on that date → consume a ticket
+//   - if student was absent → skip (no ticket consumed, naturally deferred)
+//   - stop when tickets run out → that date is the expiry
+// Returns {date: 'YYYY-MM-DD'|null, sessionIndex: number, future: bool}
+function expiryInfo(sid){
+  const s=S.students.find(x=>x.id===sid);
+  if(!s||!s.package||!s.classId)return{date:null,future:false,sessIdx:null};
+  const sched=classSched(s.classId);
+  if(!sched.length)return{date:null,future:false,sessIdx:null};
+  const att=stuAtt(sid);
+  let used=0;
+  for(let i=0;i<sched.length;i++){
+    const d=sched[i];
+    const v=att[d];
+    if(v==='present'||v==='makeup'){
+      used++;
+      if(used>=s.package){
+        return{date:d, sessIdx:i+1, future: d>todayStr()};
+      }
+    }
+    // absent or unmarked: no ticket consumed
+  }
+  // Tickets not yet exhausted — find Nth future scheduled date
+  const future=sched.filter(d=>!att[d]||att[d]==='absent');
+  const needed=s.package-used;
+  // Count future unattended (unmarked) sessions
+  const unmarked=sched.filter(d=> d>=todayStr() && (!att[d]||att[d]==='absent'));
+  if(unmarked.length>=needed){
+    return{date:unmarked[needed-1], sessIdx:null, future:true, projected:true};
+  }
+  return{date:null,future:true,projected:true};
+}
+
+// Status: 'out' = 0 remaining, 'low' = ≤3, 'ok', null
+function stuStatus(sid){
+  const rem=remaining(sid);
+  if(rem===null)return null;
+  if(rem===0)return'out';
+  if(rem<=3)return'low';
+  return'ok';
+}
+function statusBadge(sid){
+  const st=stuStatus(sid);
+  if(st==='out')return'<span class="badge brr">已用完</span>';
+  if(st==='low')return'<span class="badge bww">即將用完</span>';
+  if(st==='ok')return'<span class="badge bgg">正常</span>';
+  return'<span class="badge ba">無套票</span>';
+}
+function clsColor(sid){
+  const s=S.students.find(x=>x.id===sid);
+  const c=s&&S.classes.find(x=>x.id===s.classId);
+  return c?c.color:COLORS[0];
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const PAGES=['cal','classes','students','tuition','dash'];
+function nav(p){
+  document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+  document.getElementById('pg-'+p).classList.add('on');
+  document.querySelectorAll('.ni').forEach((n,i)=>n.classList.toggle('on',PAGES[i]===p));
+  if(p==='cal')renderCal();
+  if(p==='classes')renderClasses();
+  if(p==='students')renderStuList();
+  if(p==='tuition')renderPays();
+  if(p==='dash')renderDash();
+}
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+
+// ============================================================
+// MAIN CALENDAR
+// ============================================================
+function calStep(d){calM+=d;if(calM>11){calM=0;calY++;}if(calM<0){calM=11;calY--;}renderCal();}
+function renderCal(){
+  document.getElementById('cal-label').textContent=`${calY} 年 ${calM+1} 月`;
+  // Legend
+  const leg=document.getElementById('cal-legend');
+  leg.innerHTML=S.classes.length===0
+    ?'<span style="font-size:13px;color:var(--text3)">尚無班級，前往「班級管理」新增</span>'
+    :S.classes.map(c=>`<div class="leg"><div class="dot" style="background:${c.color}"></div>${c.name}${c.time?` <span style="font-size:11px;color:var(--text3)">${c.time}</span>`:''}</div>`).join('');
+  // Heads
+  document.getElementById('cal-heads').innerHTML=['日','一','二','三','四','五','六'].map(d=>`<div class="cal-hcell">${d}</div>`).join('');
+  const first=new Date(calY,calM,1).getDay();
+  const dim=new Date(calY,calM+1,0).getDate();
+  const prev=new Date(calY,calM,0).getDate();
+  let html='';
+  for(let i=first-1;i>=0;i--)html+=`<div class="cal-cell other"><div class="cal-dn" style="opacity:.25">${prev-i}</div></div>`;
+  for(let d=1;d<=dim;d++){
+    const ds=`${calY}-${pad(calM+1)}-${pad(d)}`;
+    const isT=ds===todayStr();
+    // Find classes scheduled on this date
+    const scheduled=S.classes.filter(c=>(c.schedule||[]).includes(ds));
+    const chips=scheduled.map(c=>
+      `<button class="chip" style="background:${c.color}22;color:${c.color}" onclick="event.stopPropagation();openClassDetail(${c.id})">
+        <span class="cn">${c.name}</span>
+        <span class="ct">${clsStu(c.id).length}人</span>
+      </button>`
+    ).join('');
+    html+=`<div class="cal-cell${isT?' today':''}">
+      <div class="cal-dn">${d}</div>
+      ${chips}
+      ${scheduled.length===0?'<div class="cal-hint">＋ 新增班級</div>':''}
+    </div>`;
+  }
+  const total=first+dim;
+  const rem=total%7===0?0:7-total%7;
+  for(let i=1;i<=rem;i++)html+=`<div class="cal-cell other"><div class="cal-dn" style="opacity:.25">${i}</div></div>`;
+  document.getElementById('cal-grid').innerHTML=html;
+}
+
+// ============================================================
+// CLASS DETAIL (from calendar)
+// ============================================================
+function openClassDetail(cid){
+  curClassId=cid;
+  const c=S.classes.find(x=>x.id===cid);if(!c)return;
+  document.getElementById('cdot').style.background=c.color;
+  document.getElementById('ctitle').textContent=c.name;
+  document.getElementById('csub').textContent=[c.subj,c.time,c.loc].filter(Boolean).join(' · ');
+  const stu=clsStu(cid);
+  const low=stu.filter(s=>stuStatus(s.id)==='low').length;
+  const out=stu.filter(s=>stuStatus(s.id)==='out').length;
+  const sched=(c.schedule||[]);
+  document.getElementById('c-stats').innerHTML=`
+    <div class="sc a"><div class="sl">學生數</div><div class="sv">${stu.length}</div></div>
+    <div class="sc g"><div class="sl">每堂費用</div><div class="sv" style="font-size:19px">$${c.price||'—'}</div></div>
+    <div class="sc w"><div class="sl">即將用完</div><div class="sv">${low}</div></div>
+    <div class="sc r"><div class="sl">已用完</div><div class="sv">${out}</div></div>`;
+  renderCdpTable(cid);
+  document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+  document.getElementById('pg-cls-detail').classList.add('on');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.querySelectorAll('.ni')[0].classList.add('on');
+}
+function renderCdpTable(cid){
+  const stu=clsStu(cid);
+  const tbody=document.getElementById('c-tbody');
+  const empty=document.getElementById('c-empty');
+  tbody.innerHTML='';
+  if(!stu.length){empty.style.display='block';return;}
+  empty.style.display='none';
+  stu.forEach(s=>{
+    const rem=remaining(s.id);
+    const used=consumed(s.id);
+    const ei=expiryInfo(s.id);
+    const expStr=ei.date?(ei.projected?'預計 ':'')+ `第 ${getSchedIndex(s.id,ei.date)} 堂（${fmtD(ei.date)}）`:'—';
+    tbody.innerHTML+=`<tr>
+      <td><div class="sr"><div class="av" style="background:${clsColor(s.id)}">${s.name[0]}</div>
+        <div><div style="font-weight:500">${s.name}</div><div style="font-size:11px;color:var(--text3)">${s.phone||''}</div></div></div></td>
+      <td style="font-family:'DM Mono',monospace">${used}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:600;color:${rem===0?'var(--danger)':rem<=3?'var(--warn)':'var(--accent3)'}">${rem!==null?rem:'—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${expStr}</td>
+      <td>${statusBadge(s.id)}</td>
+      <td><div class="ra">
+        <button class="btn bg-btn sm" onclick="openStuDetail(${s.id},'cls-detail')">詳細</button>
+        <button class="btn bg-btn sm" onclick="openEditStu(${s.id})">編輯</button>
+      </div></td>
+    </tr>`;
+  });
+}
+function getSchedIndex(sid,date){
+  const s=S.students.find(x=>x.id===sid);
+  if(!s||!s.classId)return'?';
+  const sched=classSched(s.classId);
+  const idx=sched.indexOf(date);
+  return idx>=0?idx+1:'?';
+}
+
+// ============================================================
+// STUDENT DETAIL
+// ============================================================
+function openStuDetail(sid,prev){
+  curStuId=sid; stuPrev=prev||'students';
+  const s=S.students.find(x=>x.id===sid);if(!s)return;
+  sdY=T.getFullYear(); sdM=T.getMonth();
+  const c=S.classes.find(x=>x.id===s.classId);
+  document.getElementById('sd-av').style.background=clsColor(sid);
+  document.getElementById('sd-av').textContent=s.name[0];
+  document.getElementById('sd-name').textContent=s.name;
+  document.getElementById('sd-sub').textContent=[c?.name,s.phone,s.note].filter(Boolean).join(' · ');
+  document.getElementById('stu-back').textContent=prev==='cls-detail'?`← 返回 ${c?.name||'班級'}`:'← 返回學生列表';
+  document.getElementById('sd-edit').onclick=()=>openEditStu(sid);
+  renderSdStats(s); renderSdCal(s); renderSdPkg(s); renderSdPays(s);
+  document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+  document.getElementById('pg-stu-detail').classList.add('on');
+}
+function backFromStu(){
+  if(stuPrev==='cls-detail'){
+    document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+    document.getElementById('pg-cls-detail').classList.add('on');
+  }else nav('students');
+}
+function renderSdStats(s){
+  const used=consumed(s.id);
+  const att=stuAtt(s.id);
+  const absent=Object.values(att).filter(v=>v==='absent').length;
+  const makeup=Object.values(att).filter(v=>v==='makeup').length;
+  const rem=remaining(s.id);
+  const price=s.price||(S.classes.find(c=>c.id===s.classId)?.price||0);
+  const fee=price&&used?used*price:0;
+  document.getElementById('sd-stats').innerHTML=`
+    <div class="dst"><div class="dsv" style="color:var(--accent3)">${used}</div><div class="dsl">出席堂數</div></div>
+    <div class="dst"><div class="dsv" style="color:var(--danger)">${absent}</div><div class="dsl">缺席</div></div>
+    <div class="dst"><div class="dsv" style="color:var(--warn)">${makeup}</div><div class="dsl">補課</div></div>
+    <div class="dst"><div class="dsv" style="color:var(--accent)">${rem!==null?rem:'—'}</div><div class="dsl">剩餘堂數</div></div>
+    <div class="dst"><div class="dsv">${fee?'$'+fee.toLocaleString():'—'}</div><div class="dsl">累計學費</div></div>`;
+}
+function sdStep(d){sdM+=d;if(sdM>11){sdM=0;sdY++;}if(sdM<0){sdM=11;sdY--;}const s=S.students.find(x=>x.id===curStuId);if(s)renderSdCal(s);}
+function renderSdCal(s){
+  document.getElementById('sd-mlabel').textContent=`${sdY}/${pad(sdM+1)}`;
+  document.getElementById('sd-mh').innerHTML=['日','一','二','三','四','五','六'].map(d=>`<div class="mc-head">${d}</div>`).join('');
+  const att=stuAtt(s.id);
+  const sched=s.classId?classSched(s.classId):[];
+  const first=new Date(sdY,sdM,1).getDay();
+  const dim=new Date(sdY,sdM+1,0).getDate();
+  let html='';
+  for(let i=0;i<first;i++)html+='<div class="md empty"></div>';
+  for(let d=1;d<=dim;d++){
+    const ds=`${sdY}-${pad(sdM+1)}-${pad(d)}`;
+    const v=att[ds];
+    const isSched=sched.includes(ds);
+    const isT=ds===todayStr();
+    let cls='md';
+    if(!isSched&&!v)cls+=' empty';
+    else if(v)cls+=' '+v;
+    else if(isSched)cls+=' sched';
+    if(isT)cls+=' today-d';
+    const click=(isSched||v)?`onclick="openAttFor(${s.id},'${ds}')"` :'';
+    html+=`<div class="${cls}" ${click}>${d}</div>`;
+  }
+  document.getElementById('sd-mg').innerHTML=html;
+}
+function openAttFor(sid,ds){attSid=sid;attDs=ds;document.getElementById('att-title').textContent=`${ds} 出缺勤`;openM('mo-att');}
+function setAtt(val){
+  if(!S.att[attSid])S.att[attSid]={};
+  if(val===null)delete S.att[attSid][attDs];
+  else S.att[attSid][attDs]=val;
+  save();closeM('mo-att');
+  const s=S.students.find(x=>x.id===attSid);
+  if(s){renderSdCal(s);renderSdStats(s);renderSdPkg(s);}
+  // also refresh class detail table if open
+  if(document.getElementById('pg-cls-detail').classList.contains('on'))renderCdpTable(curClassId);
+}
+function renderSdPkg(s){
+  const el=document.getElementById('sd-pkg');
+  if(!s.package){el.innerHTML='<p style="color:var(--text3);font-size:13px">未設定套票</p>';return;}
+  const used=consumed(s.id);
+  const rem=Math.max(0,s.package-used);
+  const pct=Math.round((used/s.package)*100);
+  let bc='g';if(rem===0)bc='r';else if(rem<=3)bc='w';
+  const ei=expiryInfo(s.id);
+  const expStr=ei.date?(ei.projected?'預計用完於 ':'到期：')+`${fmtD(ei.date)}（第${getSchedIndex(s.id,ei.date)}堂）`:'課表堂數不足，請補充課表或套票';
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px">
+      <span>${used} / ${s.package} 堂已用</span>
+      <span style="font-family:'DM Mono',monospace;font-weight:600;color:${rem===0?'var(--danger)':rem<=3?'var(--warn)':'var(--accent3)'}">${rem} 堂剩餘</span>
+    </div>
+    <div class="pb" style="height:9px"><div class="pf ${bc}" style="width:${pct}%"></div></div>
+    <div style="font-size:11px;color:var(--text2);margin-top:7px">⏳ ${expStr}</div>
+    <div style="font-size:11px;color:var(--text3);margin-top:4px">缺席不扣堂，自動順延到下一堂課</div>`;
+}
+function renderSdPays(s){
+  const list=S.pays.filter(p=>p.sid===s.id).reverse();
+  const el=document.getElementById('sd-pays');
+  if(!list.length){el.innerHTML='<p style="color:var(--text3);font-size:13px">尚無繳費記錄</p>';return;}
+  el.innerHTML=list.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+    <div><div style="font-size:13px;font-weight:500">${p.plan||'套票'}</div>
+    <div style="font-size:11px;color:var(--text3)">${fmtD(p.date)} · ${p.sess||0}堂</div></div>
+    <div style="font-family:'DM Mono',monospace;font-weight:700;color:var(--accent3)">$${(p.amt||0).toLocaleString()}</div>
+  </div>`).join('');
+}
+
+// ============================================================
+// CLASSES
+// ============================================================
+function renderClasses(){
+  const el=document.getElementById('class-list');
+  const empty=document.getElementById('class-empty');
+  if(!S.classes.length){el.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  el.innerHTML=S.classes.map(c=>{
+    const stu=clsStu(c.id);
+    const sched=c.schedule||[];
+    const future=sched.filter(d=>d>=todayStr()).length;
+    const past=sched.filter(d=>d<todayStr()).length;
+    // Show next 3 upcoming dates
+    const upcoming=sched.filter(d=>d>=todayStr()).slice(0,3).map(d=>`<span style="background:${c.color}22;color:${c.color};padding:2px 7px;border-radius:5px;font-size:11px;font-family:'DM Mono',monospace">${fmtD(d)}</span>`).join('');
+    return`<div class="card" style="border-left:4px solid ${c.color}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="width:42px;height:42px;border-radius:10px;background:${c.color}22;display:flex;align-items:center;justify-content:center;font-size:18px">🏫</div>
+          <div>
+            <div style="font-size:16px;font-weight:700">${c.name}</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">${[c.subj,c.time,c.loc].filter(Boolean).join(' · ')||'—'}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:7px">
+          <button class="btn bg-btn sm" onclick="openClassDetail(${c.id})">查看學生</button>
+          <button class="btn bg-btn sm" onclick="openEditClass(${c.id})">編輯</button>
+          <button class="btn bd sm" onclick="delClass(${c.id})">刪除</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:13px">
+        <div style="background:var(--surface2);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--text3)">學生人數</div><div style="font-size:20px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent)">${stu.length}</div></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--text3)">每堂費用</div><div style="font-size:20px;font-weight:700;font-family:'DM Mono',monospace">$${c.price||'—'}</div></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--text3)">已排堂數</div><div style="font-size:20px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent3)">${sched.length}</div></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--text3)">未來堂數</div><div style="font-size:20px;font-weight:700;font-family:'DM Mono',monospace;color:var(--warn)">${future}</div></div>
+      </div>
+      ${upcoming?`<div style="display:flex;align-items:center;gap:7px;margin-top:11px"><span style="font-size:11px;color:var(--text3)">近期課程：</span>${upcoming}</div>`:'<div style="margin-top:10px;font-size:12px;color:var(--text3)">尚未設定課表</div>'}
+    </div>`;
+  }).join('');
+}
+
+// ===== Schedule Picker =====
+function spStep(d){spM+=d;if(spM>11){spM=0;spY++;}if(spM<0){spM=11;spY--;}renderSpGrid();}
+function renderSpGrid(){
+  document.getElementById('sp-label').textContent=`${spY} 年 ${spM+1} 月`;
+  document.getElementById('sp-heads').innerHTML=['日','一','二','三','四','五','六'].map(d=>`<div class="sp-hcell">${d}</div>`).join('');
+  const first=new Date(spY,spM,1).getDay();
+  const dim=new Date(spY,spM+1,0).getDate();
+  let html='';
+  for(let i=0;i<first;i++)html+=`<div class="sp-day empty"></div>`;
+  for(let d=1;d<=dim;d++){
+    const ds=`${spY}-${pad(spM+1)}-${pad(d)}`;
+    const sel=spDates.includes(ds);
+    const isT=ds===todayStr();
+    html+=`<div class="sp-day${sel?' selected':''}${isT?' today-d':''}" onclick="spToggle('${ds}')">${d}</div>`;
+  }
+  document.getElementById('sp-grid').innerHTML=html;
+  renderSpTags();
+}
+function spToggle(ds){
+  const i=spDates.indexOf(ds);
+  if(i>=0)spDates.splice(i,1);
+  else spDates.push(ds);
+  spDates.sort();
+  renderSpGrid();
+}
+function renderSpTags(){
+  document.getElementById('sp-count').textContent=spDates.length;
+  const el=document.getElementById('sp-tags');
+  if(!spDates.length){el.innerHTML='<span class="sp-empty-hint">點選月曆格子來新增上課日</span>';return;}
+  // Show last 6 to save space, with overflow count
+  const shown=spDates.slice(-8);
+  const hidden=spDates.length-shown.length;
+  el.innerHTML=(hidden>0?`<span style="font-size:11px;color:var(--text3)">…還有 ${hidden} 天</span>`:'')
+    +shown.map(d=>`<span class="sp-tag">${fmtD(d)}<button onclick="spToggle('${d}')">×</button></span>`).join('');
+}
+function renderColorPicker(){
+  document.getElementById('cpick').innerHTML=COLORS.map(col=>
+    `<div class="cswatch${col===selColor?' on':''}" style="background:${col}" onclick="pickColor('${col}')"></div>`
+  ).join('');
+}
+function pickColor(col){selColor=col;renderColorPicker();}
+
+function openAddClass(){
+  editCid=null; spDates=[];
+  const n=new Date(); spY=n.getFullYear(); spM=n.getMonth();
+  selColor=COLORS[S.classes.length%COLORS.length];
+  document.getElementById('mc-title').textContent='新增班級';
+  ['c-name','c-subj','c-time','c-loc','c-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('c-price').value='';
+  renderColorPicker(); renderSpGrid(); openM('mo-class');
+}
+function openEditClass(id){
+  editCid=id;
+  const c=S.classes.find(x=>x.id===id);
+  document.getElementById('mc-title').textContent='編輯班級';
+  document.getElementById('c-name').value=c.name||'';
+  document.getElementById('c-subj').value=c.subj||'';
+  document.getElementById('c-price').value=c.price||'';
+  document.getElementById('c-time').value=c.time||'';
+  document.getElementById('c-loc').value=c.loc||'';
+  document.getElementById('c-note').value=c.note||'';
+  selColor=c.color||COLORS[0];
+  spDates=[...(c.schedule||[])];
+  // Set picker to the month of the first future date or today
+  const future=spDates.filter(d=>d>=todayStr());
+  if(future.length){const p=new Date(future[0]+'T00:00:00');spY=p.getFullYear();spM=p.getMonth();}
+  else{spY=T.getFullYear();spM=T.getMonth();}
+  renderColorPicker(); renderSpGrid(); openM('mo-class');
+}
+function saveClass(){
+  const name=document.getElementById('c-name').value.trim();
+  if(!name){alert('請輸入班級名稱');return;}
+  const data={name,subj:document.getElementById('c-subj').value.trim(),price:+document.getElementById('c-price').value||0,time:document.getElementById('c-time').value.trim(),loc:document.getElementById('c-loc').value.trim(),note:document.getElementById('c-note').value.trim(),color:selColor,schedule:[...spDates].sort()};
+  if(editCid){
+    const i=S.classes.findIndex(x=>x.id===editCid);
+    S.classes[i]={...S.classes[i],...data};
+  }else{
+    S.classes.push({id:S.nid++,...data});
+  }
+  save();closeM('mo-class');renderClasses();
+}
+function delClass(id){
+  if(!confirm('刪除班級後，該班學生將變為未分配。確定？'))return;
+  S.classes=S.classes.filter(x=>x.id!==id);
+  S.students.filter(s=>s.classId===id).forEach(s=>s.classId=null);
+  save();renderClasses();
+}
+
+// ============================================================
+// STUDENTS
+// ============================================================
+function renderStuList(){
+  const q=(document.getElementById('s-search')?.value||'').toLowerCase();
+  const cid=+document.getElementById('s-filter')?.value||0;
+  // Refresh filter
+  const f=document.getElementById('s-filter');
+  const cv=f.value;
+  f.innerHTML='<option value="">全部班級</option>'+S.classes.map(c=>`<option value="${c.id}"${c.id==cv?' selected':''}>${c.name}</option>`).join('');
+  const list=S.students.filter(s=>{
+    if(q&&!s.name.toLowerCase().includes(q))return false;
+    if(cid&&s.classId!==cid)return false;
+    return true;
+  });
+  const tbody=document.getElementById('all-tbody'),empty=document.getElementById('all-empty');
+  tbody.innerHTML='';
+  if(!list.length){empty.style.display='block';return;}
+  empty.style.display='none';
+  list.forEach(s=>{
+    const c=S.classes.find(x=>x.id===s.classId);
+    const rem=remaining(s.id);
+    const used=consumed(s.id);
+    const ei=expiryInfo(s.id);
+    const expStr=ei.date?(ei.projected?'預計 ':'')+fmtD(ei.date):'—';
+    tbody.innerHTML+=`<tr>
+      <td><div class="sr"><div class="av" style="background:${clsColor(s.id)}">${s.name[0]}</div>
+        <div><div style="font-weight:500">${s.name}</div><div style="font-size:11px;color:var(--text3)">${s.phone||''}</div></div></div></td>
+      <td>${c?`<span style="display:inline-flex;align-items:center;gap:5px"><div class="dot" style="background:${c.color}"></div>${c.name}</span>`:'<span style="color:var(--text3)">未分配</span>'}</td>
+      <td style="font-family:'DM Mono',monospace">${used}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:600;color:${rem===0?'var(--danger)':rem&&rem<=3?'var(--warn)':'var(--accent3)'}">${rem!==null?rem:'—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${expStr}</td>
+      <td>${statusBadge(s.id)}</td>
+      <td><div class="ra">
+        <button class="btn bg-btn sm" onclick="openStuDetail(${s.id},'students')">詳細</button>
+        <button class="btn bg-btn sm" onclick="openEditStu(${s.id})">編輯</button>
+        <button class="btn bd sm" onclick="delStu(${s.id})">刪除</button>
+      </div></td>
+    </tr>`;
+  });
+}
+function openAddStudent(cid){
+  editSid=null;
+  document.getElementById('ms-title').textContent='新增學生';
+  ['s-name','s-phone','s-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('s-price').value='';
+  document.getElementById('s-pkg').value='';
+  popStuClassSel(cid);
+  openM('mo-stu');
+}
+function openEditStu(id){
+  editSid=id;
+  const s=S.students.find(x=>x.id===id);
+  document.getElementById('ms-title').textContent='編輯學生';
+  document.getElementById('s-name').value=s.name||'';
+  document.getElementById('s-phone').value=s.phone||'';
+  document.getElementById('s-price').value=s.price||'';
+  document.getElementById('s-pkg').value=s.package||'';
+  document.getElementById('s-note').value=s.note||'';
+  popStuClassSel(s.classId);
+  openM('mo-stu');
+}
+function popStuClassSel(sel){
+  document.getElementById('s-cls').innerHTML='<option value="">— 未分配 —</option>'+S.classes.map(c=>`<option value="${c.id}"${c.id===sel?' selected':''}>${c.name}</option>`).join('');
+}
+function saveStu(){
+  const name=document.getElementById('s-name').value.trim();
+  if(!name){alert('請輸入學生姓名');return;}
+  const data={name,classId:+document.getElementById('s-cls').value||null,phone:document.getElementById('s-phone').value.trim(),price:+document.getElementById('s-price').value||0,package:+document.getElementById('s-pkg').value||0,note:document.getElementById('s-note').value.trim()};
+  if(editSid){
+    const i=S.students.findIndex(x=>x.id===editSid);
+    S.students[i]={...S.students[i],...data};
+    save();closeM('mo-stu');
+    if(document.getElementById('pg-cls-detail').classList.contains('on'))renderCdpTable(curClassId);
+    if(document.getElementById('pg-students').classList.contains('on'))renderStuList();
+    if(document.getElementById('pg-stu-detail').classList.contains('on'))openStuDetail(editSid,stuPrev);
+  }else{
+    S.students.push({id:S.nid++,...data});
+    save();closeM('mo-stu');
+    if(document.getElementById('pg-cls-detail').classList.contains('on'))renderCdpTable(curClassId);
+    if(document.getElementById('pg-students').classList.contains('on'))renderStuList();
+  }
+}
+function delStu(id){
+  if(!confirm('確定刪除此學生？'))return;
+  S.students=S.students.filter(x=>x.id!==id);
+  delete S.att[id];
+  S.pays=S.pays.filter(p=>p.sid!==id);
+  save();renderStuList();
+}
+
+// ============================================================
+// PAYMENTS
+// ============================================================
+function renderPays(){
+  const tbody=document.getElementById('pay-tbody'),empty=document.getElementById('pay-empty');
+  const list=[...S.pays].reverse();
+  tbody.innerHTML='';
+  if(!list.length){empty.style.display='block';return;}
+  empty.style.display='none';
+  list.forEach(p=>{
+    const s=S.students.find(x=>x.id===p.sid);
+    const c=s&&S.classes.find(x=>x.id===s.classId);
+    tbody.innerHTML+=`<tr>
+      <td style="font-size:12px">${fmtD(p.date)}</td>
+      <td><div class="sr"><div class="av" style="background:${clsColor(s?.id||0)};width:28px;height:28px;font-size:11px">${(s?.name||'?')[0]}</div><span>${s?.name||'已刪除'}</span></div></td>
+      <td>${c?`<span style="display:inline-flex;align-items:center;gap:5px"><div class="dot" style="background:${c.color}"></div>${c.name}</span>`:'—'}</td>
+      <td>${p.plan||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--accent3)">$${(p.amt||0).toLocaleString()}</td>
+      <td style="font-family:'DM Mono',monospace">${p.sess||'—'} 堂</td>
+      <td style="font-size:12px;color:var(--text3)">${p.note||''}</td>
+    </tr>`;
+  });
+}
+function openAddPay(){
+  document.getElementById('p-stu').innerHTML='<option value="">— 選擇學生 —</option>'+S.students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  document.getElementById('p-date').value=todayStr();
+  ['p-plan','p-amt','p-sess','p-note'].forEach(id=>document.getElementById(id).value='');
+  openM('mo-pay');
+}
+function savePay(){
+  const sid=+document.getElementById('p-stu').value;
+  if(!sid){alert('請選擇學生');return;}
+  const sess=+document.getElementById('p-sess').value||0;
+  const p={id:S.nid++,sid,date:document.getElementById('p-date').value,plan:document.getElementById('p-plan').value,amt:+document.getElementById('p-amt').value||0,sess,note:document.getElementById('p-note').value};
+  S.pays.push(p);
+  if(sess){const s=S.students.find(x=>x.id===sid);if(s)s.package=(s.package||0)+sess;}
+  save();closeM('mo-pay');renderPays();
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDash(){
+  document.getElementById('dash-date').textContent=fmtD(todayStr());
+  document.getElementById('d-cls').textContent=S.classes.length;
+  document.getElementById('d-stu').textContent=S.students.length;
+  let low=0,out=0;
+  S.students.forEach(s=>{const st=stuStatus(s.id);if(st==='low')low++;if(st==='out')out++;});
+  document.getElementById('d-low').textContent=low;
+  document.getElementById('d-out').textContent=out;
+  const al=document.getElementById('dash-alerts');
+  al.innerHTML='';
+  S.students.filter(s=>stuStatus(s.id)==='out').forEach(s=>al.innerHTML+=`<div class="alert r">⚠️ ${s.name} 套票已用完，請續費！</div>`);
+  S.students.filter(s=>stuStatus(s.id)==='low').forEach(s=>al.innerHTML+=`<div class="alert w">🔔 ${s.name} 剩餘 ${remaining(s.id)} 堂，即將用完</div>`);
+  document.getElementById('dash-rows').innerHTML=S.classes.map(c=>{
+    const stu=clsStu(c.id);
+    const totalUsed=stu.reduce((a,s)=>a+consumed(s.id),0);
+    return`<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)">
+      <div class="dot" style="background:${c.color};width:11px;height:11px"></div>
+      <div style="flex:1;font-weight:500">${c.name}</div>
+      <div style="font-size:12px;color:var(--text2)">${stu.length} 位學生</div>
+      <div style="font-size:12px;color:var(--text2)">${(c.schedule||[]).length} 堂課已排</div>
+      <div style="font-size:12px;color:var(--text2)">累計上課 ${totalUsed} 堂次</div>
+      <button class="btn bg-btn sm" onclick="openClassDetail(${c.id})">查看 →</button>
+    </div>`;
+  }).join('')||'<p style="color:var(--text3);font-size:13px">尚無班級資料</p>';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderCal();
+
+// Sample data
+if(!S.classes.length&&!S.students.length){
+  const btn=document.createElement('button');
+  btn.className='btn bg-btn';
+  btn.style.cssText='position:fixed;bottom:16px;right:16px;font-size:12px;z-index:99';
+  btn.textContent='📦 載入示範資料';
+  btn.onclick=()=>{
+    // Build schedule: irregular dates
+    function ds(y,m,d){return`${y}-${pad(m)}-${pad(d)}`;}
+    const y=T.getFullYear(),mn=T.getMonth()+1;
+    const prev=mn===1?12:mn-1, py=mn===1?y-1:y;
+    const next=mn===12?1:mn+1, ny=mn===12?y+1:y;
+    S.classes=[
+      {id:1,name:'國二數學班',subj:'數學',price:500,time:'15:00–16:30',loc:'教室A',color:'#7c6dfa',note:'',
+        schedule:[ds(py,prev,8),ds(py,prev,15),ds(py,prev,22),ds(py,prev,29),ds(y,mn,6),ds(y,mn,13),ds(y,mn,20),ds(y,mn,27),ds(ny,next,3),ds(ny,next,10)].sort()},
+      {id:2,name:'高二英文班',subj:'英文',price:600,time:'14:00–15:30',loc:'教室B',color:'#fa6d8b',note:'',
+        schedule:[ds(py,prev,5),ds(py,prev,12),ds(py,prev,19),ds(y,mn,2),ds(y,mn,9),ds(y,mn,16),ds(y,mn,23),ds(ny,next,6),ds(ny,next,13)].sort()},
+    ];
+    S.students=[
+      {id:3,name:'王小明',classId:1,phone:'0912-345678',price:0,package:8,note:''},
+      {id:4,name:'李美麗',classId:1,phone:'0923-456789',price:0,package:6,note:''},
+      {id:5,name:'張大偉',classId:2,phone:'0934-567890',price:0,package:10,note:''},
+      {id:6,name:'陳小花',classId:2,phone:'0945-678901',price:0,package:4,note:''},
+    ];
+    S.nid=7;
+    // Mark some attendance
+    const c1sched=S.classes[0].schedule;
+    const c2sched=S.classes[1].schedule;
+    S.att[3]={[c1sched[0]]:'present',[c1sched[1]]:'present',[c1sched[2]]:'absent',[c1sched[3]]:'present',[c1sched[4]]:'present'};
+    S.att[4]={[c1sched[0]]:'present',[c1sched[1]]:'absent',[c1sched[2]]:'present',[c1sched[3]]:'makeup',[c1sched[4]]:'present'};
+    S.att[5]={[c2sched[0]]:'present',[c2sched[1]]:'present',[c2sched[2]]:'present',[c2sched[3]]:'present',[c2sched[4]]:'present',[c2sched[5]]:'present',[c2sched[6]]:'present',[c2sched[7]]:'present',[c2sched[8]]:'present'};
+    S.att[6]={[c2sched[0]]:'present',[c2sched[1]]:'present',[c2sched[2]]:'present',[c2sched[3]]:'present'};
+    save();btn.remove();renderCal();
+  };
+  document.body.appendChild(btn);
+}
+</script>
+</body>
+</html>
