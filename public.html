@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>環流創作課程時間表</title>
+<title>環流創作 課程時間表</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -12,89 +12,65 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;}
-
 .wrap{max-width:1020px;margin:0 auto;padding:40px 24px 72px;}
-
-/* Header */
 .header{text-align:center;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--border);}
-.header h1{font-family:'Noto Serif TC',serif;font-size:26px;font-weight:700;letter-spacing:3px;}
+.header h1{font-family:'Noto Serif TC',serif;font-size:26px;font-weight:700;letter-spacing:4px;}
 .header p{font-size:12px;color:var(--text3);margin-top:8px;letter-spacing:1px;}
-
-/* Toolbar */
 .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:24px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);}
 .tl{font-size:12px;color:var(--text2);font-weight:500;white-space:nowrap;}
-select,input[type=number]{background:#fff;border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;}
-select:focus,input:focus{border-color:var(--accent);}
+select{background:#fff;border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;}
+select:focus{border-color:var(--accent);}
 .sep{width:1px;height:20px;background:var(--border);margin:0 4px;}
 .ml{margin-left:auto;display:flex;gap:8px;}
 .btn{padding:7px 16px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:all .15s;white-space:nowrap;}
 .bp{background:var(--accent);color:#fff;}.bp:hover{background:#3a30af;}
 .bg{background:transparent;color:var(--text2);border:1px solid var(--border);}.bg:hover{background:var(--surface2);}
-
-/* Legend */
 .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
 .leg{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);}
 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-
-/* Year section label */
-.year-section{font-family:'Noto Serif TC',serif;font-size:17px;font-weight:600;color:var(--text);text-align:center;margin-bottom:20px;letter-spacing:2px;}
-
-/* 12-month grid: 3 columns */
 .cal-grid-12{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
 @media(max-width:680px){.cal-grid-12{grid-template-columns:1fr;}}
-
-/* Single month */
 .month-block{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
 .month-title{font-family:'Noto Serif TC',serif;font-size:13px;font-weight:600;text-align:center;padding:9px 6px;background:var(--surface2);border-bottom:1px solid var(--border);letter-spacing:1px;}
 .day-heads{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface);border-bottom:1px solid var(--border);}
 .day-head{text-align:center;padding:5px 2px;font-size:10px;font-weight:600;color:var(--text3);}
 .days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);}
-.day-cell{background:#fff;min-height:38px;padding:3px 2px;display:flex;flex-direction:column;gap:2px;}
+.day-cell{background:#fff;min-height:42px;padding:3px 2px;display:flex;flex-direction:column;gap:2px;}
 .day-cell.other{background:var(--surface);}
 .day-cell.is-today{background:#f0eeff;}
 .day-num{font-size:10px;color:var(--text3);width:17px;height:17px;display:flex;align-items:center;justify-content:center;border-radius:4px;flex-shrink:0;}
 .day-cell.is-today .day-num{color:var(--accent);background:rgba(74,63,191,.15);font-weight:700;}
-.chip{border-radius:3px;padding:1px 4px;font-size:9px;font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.6;}
-
-/* Export modal */
+/* Chip shows class name + time stacked */
+.chip{border-radius:3px;padding:2px 4px;font-size:9px;font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.5;}
+.chip-time{font-size:8px;opacity:.75;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;}
 .mo.open{display:flex;}
 .modal{background:#fff;border:1px solid var(--border);border-radius:14px;padding:24px;width:420px;max-width:92vw;}
 .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
 .mh h3{font-size:15px;font-weight:700;}
 .mclose{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px;line-height:1;}
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
 .fi{display:flex;flex-direction:column;gap:5px;}
 .fi label{font-size:12px;color:var(--text2);font-weight:500;}
 .mf{display:flex;gap:8px;justify-content:flex-end;padding-top:14px;border-top:1px solid var(--border);}
-
-/* Loading */
 .loading{text-align:center;padding:60px 20px;color:var(--text3);}
 .spinner{width:30px;height:30px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
-/* Footer */
 .footer{text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);letter-spacing:.5px;}
-
-/* Export canvas area (hidden) */
-#export-area{position:fixed;left:-9999px;top:0;background:#fff;font-family:'Noto Sans TC',sans-serif;}
+#export-area{position:fixed;left:-9999px;top:0;background:#fff;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="header">
-    <h1>環流創作課程時間表</h1>
+    <h1>環流創作 課程時間表</h1>
     <p>以下為各班級最新課程安排</p>
   </div>
-
   <div id="loading" class="loading"><div class="spinner"></div><p>載入課表中</p></div>
-
   <div id="content" style="display:none">
     <div class="toolbar">
       <span class="tl">班級篩選</span>
-      <select id="filter-cls" onchange="renderAll()">
-        <option value="">全部班級</option>
-      </select>
+      <select id="filter-cls" onchange="renderAll()"><option value="">全部班級</option></select>
       <div class="sep"></div>
       <span class="tl">學年</span>
       <select id="filter-year" onchange="renderAll()"></select>
@@ -102,27 +78,18 @@ select:focus,input:focus{border-color:var(--accent);}
         <button class="btn bg" onclick="openExportModal()">輸出圖片</button>
       </div>
     </div>
-
     <div class="legend" id="legend"></div>
     <div id="cal-area"></div>
   </div>
-
   <div class="footer">如有任何疑問，請直接與老師聯繫</div>
 </div>
 
-<!-- Export modal -->
 <div class="mo" id="mo-export">
 <div class="modal">
   <div class="mh"><h3>輸出課表圖片</h3><button class="mclose" onclick="closeM()">×</button></div>
-  <div class="fg">
-    <div class="fi">
-      <label>起始月份</label>
-      <select id="exp-start"></select>
-    </div>
-    <div class="fi">
-      <label>結束月份</label>
-      <select id="exp-end"></select>
-    </div>
+  <div class="fg2">
+    <div class="fi"><label>起始月份</label><select id="exp-start"></select></div>
+    <div class="fi"><label>結束月份</label><select id="exp-end"></select></div>
   </div>
   <div style="font-size:12px;color:var(--text3);margin-bottom:4px">建議一次選 3–4 個月，圖片較清晰</div>
   <div class="mf">
@@ -131,29 +98,27 @@ select:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 </div>
-
 <div id="export-area"></div>
 
 <script>
 const GS_URL='https://script.google.com/macros/s/AKfycbxPVGtrop_WXDxpUjVzZ1A8DSA9EIM0Vbf67Czs5FQKd2uaSqTwV9JgVDbHV_es4TVj/exec';
-const MONTH_NAMES=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 let classes=[];
 const T=new Date();
 
 function pad(n){return String(n).padStart(2,'0');}
 function todayStr(){return`${T.getFullYear()}-${pad(T.getMonth()+1)}-${pad(T.getDate())}`;}
 
-// Academic year: Sep this year ~ Aug next year (or Sep last year ~ Aug this year)
+// Academic year: Jul ~ Jun next year
 function getAcadYears(){
   const y=T.getFullYear();
-  // Offer current and next academic year
+  const nowM=T.getMonth(); // 0-indexed; Jun=5, Jul=6
+  // If Jan–Jun, current acad year started last July
   return[
-    {label:`${y-1}–${y} 學年（${y-1}/9 ~ ${y}/8）`, startY:y-1, startM:8},
-    {label:`${y}–${y+1} 學年（${y}/9 ~ ${y+1}/8）`, startY:y, startM:8},
+    {label:`${y-1}–${y} 學年（${y-1}/7 ~ ${y}/6）`, startY:y-1, startM:6},
+    {label:`${y}–${y+1} 學年（${y}/7 ~ ${y+1}/6）`, startY:y, startM:6},
   ];
 }
 
-// Generate 12 months from startY/startM (0-indexed month)
 function getYearMonths(startY, startM){
   const months=[];
   for(let i=0;i<12;i++){
@@ -170,7 +135,7 @@ async function loadData(){
     const r=await fetch(GS_URL+'?action=read');
     const j=await r.json();
     classes=(j.classes||[]).map(c=>({
-      ...c,id:+c.id,
+      ...c, id:+c.id,
       schedule:c.schedule?String(c.schedule).split(',').filter(Boolean):[]
     }));
   }catch(e){
@@ -184,102 +149,102 @@ async function loadData(){
 }
 
 function setupControls(){
-  // Class filter
   const fc=document.getElementById('filter-cls');
   fc.innerHTML='<option value="">全部班級</option>'+classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-
-  // Year selector
   const fy=document.getElementById('filter-year');
   const years=getAcadYears();
   fy.innerHTML=years.map((y,i)=>`<option value="${i}">${y.label}</option>`).join('');
-  // Default to current academic year
-  const nowM=T.getMonth(); // 0-indexed
-  fy.value=nowM>=8?1:0; // if Sep or later, show current->next, else prev->current
+  // Default: if Jul or later → show current→next; else show prev→current
+  fy.value=T.getMonth()>=6?1:0;
 }
 
 function getFilteredClasses(){
   const cid=+document.getElementById('filter-cls').value||0;
   return cid?classes.filter(c=>c.id===cid):classes;
 }
-
 function getSelectedYearMonths(){
   const idx=+document.getElementById('filter-year').value;
   const y=getAcadYears()[idx];
   return getYearMonths(y.startY,y.startM);
 }
-
 function renderAll(){
   renderLegend();
-  renderCalendars(getSelectedYearMonths(), getFilteredClasses(), document.getElementById('cal-area'));
+  renderCalendars(getSelectedYearMonths(),getFilteredClasses(),document.getElementById('cal-area'));
 }
-
 function renderLegend(){
-  const filtered=getFilteredClasses();
-  document.getElementById('legend').innerHTML=filtered.map(c=>
-    `<div class="leg"><div class="dot" style="background:${c.color}"></div>${c.name}</div>`
+  const f=getFilteredClasses();
+  document.getElementById('legend').innerHTML=f.map(c=>
+    `<div class="leg"><div class="dot" style="background:${c.color}"></div><span>${c.name}${c.time?`　${c.time}`:''}</span></div>`
   ).join('');
 }
 
-function renderCalendars(months, filteredClasses, container){
+function makeChip(c, inline=false){
+  const bg=hexToRgba(c.color,0.12);
+  const col=darken(c.color);
+  if(inline){
+    return`<div style="border-radius:3px;padding:2px 4px;font-size:8px;font-weight:500;line-height:1.5;background:${bg};color:${col};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name}${c.time?`<span style="display:block;font-size:7px;opacity:.8">${c.time}</span>`:''}</div>`;
+  }
+  return`<div class="chip" style="background:${bg};color:${col}">${c.name}${c.time?`<span class="chip-time">${c.time}</span>`:''}</div>`;
+}
+
+// Darken a hex color for better contrast on white
+function darken(hex){
+  let r=parseInt(hex.slice(1,3),16);
+  let g=parseInt(hex.slice(3,5),16);
+  let b=parseInt(hex.slice(5,7),16);
+  r=Math.round(r*0.65); g=Math.round(g*0.65); b=Math.round(b*0.65);
+  return`#${pad(r.toString(16))}${pad(g.toString(16))}${pad(b.toString(16))}`;
+}
+function hexToRgba(hex,a){
+  const r=parseInt(hex.slice(1,3),16);
+  const g=parseInt(hex.slice(3,5),16);
+  const b=parseInt(hex.slice(5,7),16);
+  return`rgba(${r},${g},${b},${a})`;
+}
+
+function renderCalendars(months,filteredClasses,container){
   const today=todayStr();
-  // Group into rows of 3
-  const years=getAcadYears();
   const idx=+document.getElementById('filter-year').value;
-  const y=years[idx];
-
-  let html=`<div style="font-family:'Noto Serif TC',serif;font-size:16px;font-weight:600;text-align:center;margin-bottom:18px;letter-spacing:2px;color:var(--text)">${y.label}</div>`;
+  const y=getAcadYears()[idx];
+  let html=`<div style="font-family:'Noto Serif TC',serif;font-size:15px;font-weight:600;text-align:center;margin-bottom:18px;letter-spacing:2px;color:var(--text)">${y.label}</div>`;
   html+='<div class="cal-grid-12">';
-
   months.forEach(({y:yr,m})=>{
     const first=new Date(yr,m,1).getDay();
     const dim=new Date(yr,m+1,0).getDate();
     const prevDim=new Date(yr,m,0).getDate();
-
     let cells='';
-    // Prev month fillers
     for(let i=first-1;i>=0;i--)
-      cells+=`<div class="day-cell other"><div class="day-num" style="opacity:.3">${prevDim-i}</div></div>`;
-
+      cells+=`<div class="day-cell other"><div class="day-num" style="opacity:.25">${prevDim-i}</div></div>`;
     for(let d=1;d<=dim;d++){
       const ds=`${yr}-${pad(m+1)}-${pad(d)}`;
       const isT=ds===today;
       const scheduled=filteredClasses.filter(c=>(c.schedule||[]).includes(ds));
-      const chips=scheduled.map(c=>
-        `<div class="chip" style="background:${c.color}20;color:${c.color}">${c.name}</div>`
-      ).join('');
-      cells+=`<div class="day-cell${isT?' is-today':''}">
-        <div class="day-num">${d}</div>${chips}
-      </div>`;
+      const chips=scheduled.map(c=>makeChip(c)).join('');
+      cells+=`<div class="day-cell${isT?' is-today':''}"><div class="day-num">${d}</div>${chips}</div>`;
     }
-
     const total=first+dim;
     const rem=total%7===0?0:7-total%7;
     for(let i=1;i<=rem;i++)
-      cells+=`<div class="day-cell other"><div class="day-num" style="opacity:.3">${i}</div></div>`;
-
+      cells+=`<div class="day-cell other"><div class="day-num" style="opacity:.25">${i}</div></div>`;
     html+=`<div class="month-block">
       <div class="month-title">${yr} 年 ${m+1} 月</div>
       <div class="day-heads">${['日','一','二','三','四','五','六'].map(d=>`<div class="day-head">${d}</div>`).join('')}</div>
       <div class="days-grid">${cells}</div>
     </div>`;
   });
-
   html+='</div>';
   container.innerHTML=html;
 }
 
-// Export modal
 function buildMonthOptions(){
-  const months=getSelectedYearMonths();
-  return months.map(({y,m},i)=>`<option value="${i}">${y}年${m+1}月</option>`).join('');
+  return getSelectedYearMonths().map(({y,m},i)=>`<option value="${i}">${y}年${m+1}月</option>`).join('');
 }
 function openExportModal(){
   const opts=buildMonthOptions();
   document.getElementById('exp-start').innerHTML=opts;
   document.getElementById('exp-end').innerHTML=opts;
-  // Default: first 4 months
   document.getElementById('exp-start').value=0;
-  document.getElementById('exp-end').value=Math.min(3, getSelectedYearMonths().length-1);
+  document.getElementById('exp-end').value=Math.min(3,getSelectedYearMonths().length-1);
   document.getElementById('mo-export').classList.add('open');
 }
 function closeM(){document.getElementById('mo-export').classList.remove('open');}
@@ -292,21 +257,18 @@ async function doExport(){
   if(s>e){alert('起始月份不能晚於結束月份');return;}
   const selected=months.slice(s,e+1);
   const filtered=getFilteredClasses();
-
-  // Build export HTML
-  const cols=Math.min(selected.length,2); // 2 columns for export
+  const cols=Math.min(selected.length,2);
   const area=document.getElementById('export-area');
 
-  let inner=`
-    <div style="padding:32px 28px;background:#fff;width:${cols===2?820:420}px">
-      <div style="text-align:center;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid #e0ddd6">
-        <div style="font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;letter-spacing:3px;color:#1a1a1a">環流創作課程時間表</div>
-        <div style="font-size:11px;color:#999;margin-top:6px;letter-spacing:1px">
-          ${selected[0].y}年${selected[0].m+1}月 – ${selected[selected.length-1].y}年${selected[selected.length-1].m+1}月
-          ${filtered.length<classes.length?' ·  '+filtered.map(c=>c.name).join('、'):''}
-        </div>
+  let inner=`<div style="padding:32px 28px;background:#fff;width:${cols===2?840:440}px;font-family:'Noto Sans TC',sans-serif;">
+    <div style="text-align:center;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid #e0ddd6">
+      <div style="font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;letter-spacing:4px;color:#1a1a1a">環流創作 課程時間表</div>
+      <div style="font-size:11px;color:#999;margin-top:6px;letter-spacing:1px">
+        ${selected[0].y}年${selected[0].m+1}月 – ${selected[selected.length-1].y}年${selected[selected.length-1].m+1}月
+        ${filtered.length<classes.length?' ·  '+filtered.map(c=>c.name).join('、'):''}
       </div>
-      <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:14px">`;
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:14px">`;
 
   selected.forEach(({y:yr,m})=>{
     const first=new Date(yr,m,1).getDay();
@@ -314,18 +276,17 @@ async function doExport(){
     const prevDim=new Date(yr,m,0).getDate();
     let cells='';
     for(let i=first-1;i>=0;i--)
-      cells+=`<div style="background:#f8f8f6;min-height:34px;padding:3px 2px;display:flex;flex-direction:column;gap:2px"><div style="font-size:10px;color:#ccc;width:17px;height:17px;display:flex;align-items:center;justify-content:center;">${prevDim-i}</div></div>`;
+      cells+=`<div style="background:#f8f8f6;min-height:36px;padding:3px 2px;display:flex;flex-direction:column;gap:2px;"><div style="font-size:10px;color:#ccc;width:16px;height:16px;display:flex;align-items:center;justify-content:center;">${prevDim-i}</div></div>`;
     for(let d=1;d<=dim;d++){
       const ds=`${yr}-${pad(m+1)}-${pad(d)}`;
       const sc=filtered.filter(c=>(c.schedule||[]).includes(ds));
-      const chips=sc.map(c=>`<div style="border-radius:3px;padding:1px 4px;font-size:8px;font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.6;background:${c.color}20;color:${c.color}">${c.name}</div>`).join('');
-      cells+=`<div style="background:#fff;min-height:34px;padding:3px 2px;display:flex;flex-direction:column;gap:2px"><div style="font-size:10px;color:#999;width:17px;height:17px;display:flex;align-items:center;justify-content:center;">${d}</div>${chips}</div>`;
+      const chips=sc.map(c=>makeChip(c,true)).join('');
+      cells+=`<div style="background:#fff;min-height:36px;padding:3px 2px;display:flex;flex-direction:column;gap:2px;"><div style="font-size:10px;color:#888;width:16px;height:16px;display:flex;align-items:center;justify-content:center;">${d}</div>${chips}</div>`;
     }
     const total=first+dim;
     const rem2=total%7===0?0:7-total%7;
     for(let i=1;i<=rem2;i++)
-      cells+=`<div style="background:#f8f8f6;min-height:34px;padding:3px 2px;display:flex;flex-direction:column;gap:2px"><div style="font-size:10px;color:#ccc;width:17px;height:17px;display:flex;align-items:center;justify-content:center;">${i}</div></div>`;
-
+      cells+=`<div style="background:#f8f8f6;min-height:36px;padding:3px 2px;display:flex;flex-direction:column;gap:2px;"><div style="font-size:10px;color:#ccc;width:16px;height:16px;display:flex;align-items:center;justify-content:center;">${i}</div></div>`;
     inner+=`<div style="border:1px solid #e0ddd6;border-radius:8px;overflow:hidden">
       <div style="font-family:'Noto Serif TC',serif;font-size:12px;font-weight:600;text-align:center;padding:8px 4px;background:#f0f0ec;border-bottom:1px solid #e0ddd6;letter-spacing:1px">${yr} 年 ${m+1} 月</div>
       <div style="display:grid;grid-template-columns:repeat(7,1fr);background:#f8f8f6;border-bottom:1px solid #e0ddd6">
@@ -335,40 +296,34 @@ async function doExport(){
     </div>`;
   });
 
-  // Legend
-  inner+=`</div><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid #e0ddd6">
-    ${filtered.map(c=>`<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><div style="width:8px;height:8px;border-radius:50%;background:${c.color}"></div>${c.name}</div>`).join('')}
-    <span style="margin-left:auto;font-size:10px;color:#bbb">環流創作</span>
-  </div></div>`;
+  inner+=`</div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid #e0ddd6;align-items:center">
+      ${filtered.map(c=>`<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#444"><div style="width:8px;height:8px;border-radius:50%;background:${darken(c.color)}"></div>${c.name}${c.time?`　${c.time}`:''}</div>`).join('')}
+      <span style="margin-left:auto;font-size:10px;color:#bbb">環流創作</span>
+    </div>
+  </div>`;
 
   area.innerHTML=inner;
 
-  // Use html2canvas to export
   if(typeof html2canvas==='undefined'){
-    const s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-    s.onload=()=>captureAndDownload(area, selected);
-    document.head.appendChild(s);
+    const sc=document.createElement('script');
+    sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    sc.onload=()=>captureAndDownload(area,selected);
+    document.head.appendChild(sc);
   }else{
-    captureAndDownload(area, selected);
+    captureAndDownload(area,selected);
   }
 }
 
-async function captureAndDownload(area, selected){
-  area.style.left='0';
-  area.style.top='0';
+async function captureAndDownload(area,selected){
+  area.style.left='0';area.style.top='0';
   try{
-    const canvas=await html2canvas(area,{
-      scale:2, useCORS:true, backgroundColor:'#ffffff',
-      logging:false
-    });
+    const canvas=await html2canvas(area,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
     const a=document.createElement('a');
-    a.download=`課程時間表_${selected[0].y}${pad(selected[0].m+1)}-${selected[selected.length-1].y}${pad(selected[selected.length-1].m+1)}.png`;
+    a.download=`環流創作課程時間表_${selected[0].y}${pad(selected[0].m+1)}-${selected[selected.length-1].y}${pad(selected[selected.length-1].m+1)}.png`;
     a.href=canvas.toDataURL('image/png');
     a.click();
-  }catch(err){
-    alert('圖片產生失敗，請再試一次');
-  }
+  }catch(err){alert('圖片產生失敗，請再試一次');}
   area.style.left='-9999px';
 }
 
