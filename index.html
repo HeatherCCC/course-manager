@@ -552,7 +552,16 @@ select option{background:var(--surface2);}
 // STATE
 // ============================================================
 const GS_URL = 'https://script.google.com/macros/s/AKfycbxPVGtrop_WXDxpUjVzZ1A8DSA9EIM0Vbf67Czs5FQKd2uaSqTwV9JgVDbHV_es4TVj/exec';
-const COLORS=['#7c6dfa','#fa6d8b','#6dfabd','#faac6d','#6db8fa','#fa6dde','#c4fa6d','#6dfaf0','#b06dfa','#fa9e6d'];
+const COLORS=[
+  // Original (dark-bg friendly, kept for backwards compat)
+  '#7c6dfa','#fa6d8b','#6dfabd','#faac6d','#6db8fa',
+  '#fa6dde','#c4fa6d','#6dfaf0','#b06dfa','#fa9e6d',
+  // New: muted tones that work well on white background
+  '#3d5a99','#c0392b','#27746a','#7d5a00','#5c3566',
+  '#1a6b3c','#8c4a2f','#2c5f8a','#6b3d6b','#4a6741',
+  '#8c6239','#2d6e7e','#7a3b3b','#3b5998','#5c6e00',
+  '#8b4513','#2e6b4f','#6b4c8b','#4a4a4a','#7a5c00',
+];
 
 // S is always the in-memory working copy (also cached in localStorage as fallback)
 let S = JSON.parse(localStorage.getItem('cms4')||'null') || {
