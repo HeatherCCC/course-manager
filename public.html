@@ -7,70 +7,77 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#ffffff;--surface:#f8f8f6;--surface2:#f0f0ec;--border:#e0ddd6;
-  --accent:#4a3fbf;--text:#1a1a1a;--text2:#555550;--text3:#999990;
-  --warn:#c47a00;--r:10px;
+  --bg:#fff;--surface:#f8f8f6;--surface2:#f0f0ec;--border:#e0ddd6;
+  --accent:#4a3fbf;--text:#1a1a1a;--text2:#555550;--text3:#999990;--r:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;min-height:100vh;line-height:1.6;}
-.wrap{max-width:800px;margin:0 auto;padding:48px 24px 72px;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;}
+
+.wrap{max-width:1020px;margin:0 auto;padding:40px 24px 72px;}
 
 /* Header */
-.header{text-align:center;margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border);}
-.header h1{font-family:'Noto Serif TC',serif;font-size:28px;font-weight:700;color:var(--text);letter-spacing:2px;line-height:1.4;}
-.header p{font-size:13px;color:var(--text3);margin-top:10px;letter-spacing:1px;}
+.header{text-align:center;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+.header h1{font-family:'Noto Serif TC',serif;font-size:26px;font-weight:700;letter-spacing:3px;}
+.header p{font-size:12px;color:var(--text3);margin-top:8px;letter-spacing:1px;}
 
-/* Month nav */
-.cal-nav{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:20px;}
-.cal-nav button{background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:6px 16px;cursor:pointer;font-size:16px;font-family:inherit;transition:all .12s;}
-.cal-nav button:hover{background:var(--surface);border-color:var(--accent);color:var(--accent);}
-.cal-nav .mlabel{font-family:'Noto Serif TC',serif;font-size:18px;font-weight:600;min-width:130px;text-align:center;color:var(--text);}
-
-/* Calendar */
-.cal-outer{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:36px;}
-.cal-heads{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface2);border-bottom:1px solid var(--border);}
-.cal-head{text-align:center;padding:10px 4px;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.8px;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);}
-.cal-cell{background:var(--bg);min-height:84px;padding:8px;display:flex;flex-direction:column;gap:3px;}
-.cal-cell.other{background:var(--surface);}
-.cal-cell.today{background:#f0eeff;}
-.cal-dn{font-size:12px;font-weight:500;color:var(--text3);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:5px;margin-bottom:2px;}
-.cal-cell.today .cal-dn{color:var(--accent);background:rgba(74,63,191,.12);font-weight:700;}
-.chip{display:flex;align-items:center;gap:4px;padding:3px 7px;border-radius:4px;font-size:11px;font-weight:500;overflow:hidden;}
-.chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
-.chip-time{font-size:10px;opacity:.65;flex-shrink:0;}
-
-/* Section */
-.section-title{font-family:'Noto Serif TC',serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);letter-spacing:1px;}
-
-/* Class card */
-.class-card{border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:14px;border-left:3px solid;background:var(--bg);}
-.class-name{font-family:'Noto Serif TC',serif;font-size:18px;font-weight:700;margin-bottom:5px;color:var(--text);}
-.class-meta{font-size:13px;color:var(--text3);margin-bottom:16px;letter-spacing:.5px;}
-.upcoming-label{font-size:11px;color:var(--text3);letter-spacing:.8px;margin-bottom:9px;text-transform:uppercase;}
-.date-tags{display:flex;flex-wrap:wrap;gap:6px;}
-.date-tag{padding:4px 11px;border-radius:5px;font-size:12px;font-family:'DM Mono',monospace;border:1px solid transparent;}
-.date-tag.today-tag{font-weight:700;border-style:solid;}
+/* Toolbar */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:24px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);}
+.tl{font-size:12px;color:var(--text2);font-weight:500;white-space:nowrap;}
+select,input[type=number]{background:#fff;border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;}
+select:focus,input:focus{border-color:var(--accent);}
+.sep{width:1px;height:20px;background:var(--border);margin:0 4px;}
+.ml{margin-left:auto;display:flex;gap:8px;}
+.btn{padding:7px 16px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:all .15s;white-space:nowrap;}
+.bp{background:var(--accent);color:#fff;}.bp:hover{background:#3a30af;}
+.bg{background:transparent;color:var(--text2);border:1px solid var(--border);}.bg:hover{background:var(--surface2);}
 
 /* Legend */
-.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
 .leg{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);}
-.dot{width:8px;height:8px;border-radius:50%;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* Year section label */
+.year-section{font-family:'Noto Serif TC',serif;font-size:17px;font-weight:600;color:var(--text);text-align:center;margin-bottom:20px;letter-spacing:2px;}
+
+/* 12-month grid: 3 columns */
+.cal-grid-12{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
+@media(max-width:680px){.cal-grid-12{grid-template-columns:1fr;}}
+
+/* Single month */
+.month-block{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.month-title{font-family:'Noto Serif TC',serif;font-size:13px;font-weight:600;text-align:center;padding:9px 6px;background:var(--surface2);border-bottom:1px solid var(--border);letter-spacing:1px;}
+.day-heads{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface);border-bottom:1px solid var(--border);}
+.day-head{text-align:center;padding:5px 2px;font-size:10px;font-weight:600;color:var(--text3);}
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);}
+.day-cell{background:#fff;min-height:38px;padding:3px 2px;display:flex;flex-direction:column;gap:2px;}
+.day-cell.other{background:var(--surface);}
+.day-cell.is-today{background:#f0eeff;}
+.day-num{font-size:10px;color:var(--text3);width:17px;height:17px;display:flex;align-items:center;justify-content:center;border-radius:4px;flex-shrink:0;}
+.day-cell.is-today .day-num{color:var(--accent);background:rgba(74,63,191,.15);font-weight:700;}
+.chip{border-radius:3px;padding:1px 4px;font-size:9px;font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.6;}
+
+/* Export modal */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;}
+.mo.open{display:flex;}
+.modal{background:#fff;border:1px solid var(--border);border-radius:14px;padding:24px;width:420px;max-width:92vw;}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.mh h3{font-size:15px;font-weight:700;}
+.mclose{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px;line-height:1;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.fi{display:flex;flex-direction:column;gap:5px;}
+.fi label{font-size:12px;color:var(--text2);font-weight:500;}
+.mf{display:flex;gap:8px;justify-content:flex-end;padding-top:14px;border-top:1px solid var(--border);}
 
 /* Loading */
 .loading{text-align:center;padding:60px 20px;color:var(--text3);}
-.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px;}
+.spinner{width:30px;height:30px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
 /* Footer */
-.footer{text-align:center;margin-top:48px;padding-top:24px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);letter-spacing:.5px;}
+.footer{text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);letter-spacing:.5px;}
 
-@media(max-width:500px){
-  .header h1{font-size:22px;}
-  .cal-cell{min-height:60px;padding:4px;}
-  .chip{padding:2px 5px;font-size:10px;}
-  .chip-time{display:none;}
-}
+/* Export canvas area (hidden) */
+#export-area{position:fixed;left:-9999px;top:0;background:#fff;font-family:'Noto Sans TC',sans-serif;}
 </style>
 </head>
 <body>
@@ -80,42 +87,82 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-seri
     <p>以下為各班級最新課程安排</p>
   </div>
 
-  <div id="loading" class="loading">
-    <div class="spinner"></div>
-    <p>載入課表中</p>
-  </div>
+  <div id="loading" class="loading"><div class="spinner"></div><p>載入課表中</p></div>
 
   <div id="content" style="display:none">
-    <div class="cal-nav">
-      <button onclick="calStep(-1)">&#8249;</button>
-      <span class="mlabel" id="cal-label"></span>
-      <button onclick="calStep(1)">&#8250;</button>
-    </div>
-    <div class="legend" id="legend"></div>
-    <div class="cal-outer">
-      <div class="cal-heads" id="cal-heads"></div>
-      <div class="cal-grid" id="cal-grid"></div>
+    <div class="toolbar">
+      <span class="tl">班級篩選</span>
+      <select id="filter-cls" onchange="renderAll()">
+        <option value="">全部班級</option>
+      </select>
+      <div class="sep"></div>
+      <span class="tl">學年</span>
+      <select id="filter-year" onchange="renderAll()"></select>
+      <div class="ml">
+        <button class="btn bg" onclick="openExportModal()">輸出圖片</button>
+      </div>
     </div>
 
-    <div class="section-title">各班級課表</div>
-    <div id="class-list"></div>
+    <div class="legend" id="legend"></div>
+    <div id="cal-area"></div>
   </div>
 
   <div class="footer">如有任何疑問，請直接與老師聯繫</div>
 </div>
 
+<!-- Export modal -->
+<div class="mo" id="mo-export">
+<div class="modal">
+  <div class="mh"><h3>輸出課表圖片</h3><button class="mclose" onclick="closeM()">×</button></div>
+  <div class="fg">
+    <div class="fi">
+      <label>起始月份</label>
+      <select id="exp-start"></select>
+    </div>
+    <div class="fi">
+      <label>結束月份</label>
+      <select id="exp-end"></select>
+    </div>
+  </div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:4px">建議一次選 3–4 個月，圖片較清晰</div>
+  <div class="mf">
+    <button class="btn bg" onclick="closeM()">取消</button>
+    <button class="btn bp" onclick="doExport()">產生圖片</button>
+  </div>
+</div>
+</div>
+
+<div id="export-area"></div>
+
 <script>
-const GS_URL = 'https://script.google.com/macros/s/AKfycbxPVGtrop_WXDxpUjVzZ1A8DSA9EIM0Vbf67Czs5FQKd2uaSqTwV9JgVDbHV_es4TVj/exec';
-let classes = [];
-const T = new Date();
-let calY = T.getFullYear(), calM = T.getMonth();
+const GS_URL='https://script.google.com/macros/s/AKfycbxPVGtrop_WXDxpUjVzZ1A8DSA9EIM0Vbf67Czs5FQKd2uaSqTwV9JgVDbHV_es4TVj/exec';
+const MONTH_NAMES=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+let classes=[];
+const T=new Date();
 
 function pad(n){return String(n).padStart(2,'0');}
-function todayStr(){return `${T.getFullYear()}-${pad(T.getMonth()+1)}-${pad(T.getDate())}`;}
-function fmtShort(d){
-  if(!d)return'';
-  const dt=new Date(d+'T00:00:00');
-  return`${pad(dt.getMonth()+1)}/${pad(dt.getDate())}`;
+function todayStr(){return`${T.getFullYear()}-${pad(T.getMonth()+1)}-${pad(T.getDate())}`;}
+
+// Academic year: Sep this year ~ Aug next year (or Sep last year ~ Aug this year)
+function getAcadYears(){
+  const y=T.getFullYear();
+  // Offer current and next academic year
+  return[
+    {label:`${y-1}–${y} 學年（${y-1}/9 ~ ${y}/8）`, startY:y-1, startM:8},
+    {label:`${y}–${y+1} 學年（${y}/9 ~ ${y+1}/8）`, startY:y, startM:8},
+  ];
+}
+
+// Generate 12 months from startY/startM (0-indexed month)
+function getYearMonths(startY, startM){
+  const months=[];
+  for(let i=0;i<12;i++){
+    let m=startM+i;
+    let y=startY+Math.floor(m/12);
+    m=m%12;
+    months.push({y,m});
+  }
+  return months;
 }
 
 async function loadData(){
@@ -123,7 +170,7 @@ async function loadData(){
     const r=await fetch(GS_URL+'?action=read');
     const j=await r.json();
     classes=(j.classes||[]).map(c=>({
-      ...c, id:+c.id, price:+c.price||0,
+      ...c,id:+c.id,
       schedule:c.schedule?String(c.schedule).split(',').filter(Boolean):[]
     }));
   }catch(e){
@@ -132,77 +179,197 @@ async function loadData(){
   }
   document.getElementById('loading').style.display='none';
   document.getElementById('content').style.display='block';
+  setupControls();
   renderAll();
 }
 
-function calStep(d){
-  calM+=d;
-  if(calM>11){calM=0;calY++;}
-  if(calM<0){calM=11;calY--;}
-  renderCalendar();
+function setupControls(){
+  // Class filter
+  const fc=document.getElementById('filter-cls');
+  fc.innerHTML='<option value="">全部班級</option>'+classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+
+  // Year selector
+  const fy=document.getElementById('filter-year');
+  const years=getAcadYears();
+  fy.innerHTML=years.map((y,i)=>`<option value="${i}">${y.label}</option>`).join('');
+  // Default to current academic year
+  const nowM=T.getMonth(); // 0-indexed
+  fy.value=nowM>=8?1:0; // if Sep or later, show current->next, else prev->current
+}
+
+function getFilteredClasses(){
+  const cid=+document.getElementById('filter-cls').value||0;
+  return cid?classes.filter(c=>c.id===cid):classes;
+}
+
+function getSelectedYearMonths(){
+  const idx=+document.getElementById('filter-year').value;
+  const y=getAcadYears()[idx];
+  return getYearMonths(y.startY,y.startM);
 }
 
 function renderAll(){
   renderLegend();
-  renderCalendar();
-  renderClassList();
+  renderCalendars(getSelectedYearMonths(), getFilteredClasses(), document.getElementById('cal-area'));
 }
 
 function renderLegend(){
-  document.getElementById('legend').innerHTML=classes.map(c=>
+  const filtered=getFilteredClasses();
+  document.getElementById('legend').innerHTML=filtered.map(c=>
     `<div class="leg"><div class="dot" style="background:${c.color}"></div>${c.name}</div>`
   ).join('');
 }
 
-function renderCalendar(){
-  document.getElementById('cal-label').textContent=`${calY} 年 ${calM+1} 月`;
-  document.getElementById('cal-heads').innerHTML=
-    ['日','一','二','三','四','五','六'].map(d=>`<div class="cal-head">${d}</div>`).join('');
-  const first=new Date(calY,calM,1).getDay();
-  const dim=new Date(calY,calM+1,0).getDate();
-  const prev=new Date(calY,calM,0).getDate();
-  let html='';
-  for(let i=first-1;i>=0;i--)
-    html+=`<div class="cal-cell other"><div class="cal-dn" style="opacity:.25">${prev-i}</div></div>`;
-  for(let d=1;d<=dim;d++){
-    const ds=`${calY}-${pad(calM+1)}-${pad(d)}`;
-    const isT=ds===todayStr();
-    const scheduled=classes.filter(c=>(c.schedule||[]).includes(ds));
-    const chips=scheduled.map(c=>
-      `<div class="chip" style="background:${c.color}18;color:${c.color}">
-        <span class="chip-name">${c.name}</span>
-        ${c.time?`<span class="chip-time">${c.time}</span>`:''}
-      </div>`
-    ).join('');
-    html+=`<div class="cal-cell${isT?' today':''}">
-      <div class="cal-dn">${d}</div>${chips}
+function renderCalendars(months, filteredClasses, container){
+  const today=todayStr();
+  // Group into rows of 3
+  const years=getAcadYears();
+  const idx=+document.getElementById('filter-year').value;
+  const y=years[idx];
+
+  let html=`<div style="font-family:'Noto Serif TC',serif;font-size:16px;font-weight:600;text-align:center;margin-bottom:18px;letter-spacing:2px;color:var(--text)">${y.label}</div>`;
+  html+='<div class="cal-grid-12">';
+
+  months.forEach(({y:yr,m})=>{
+    const first=new Date(yr,m,1).getDay();
+    const dim=new Date(yr,m+1,0).getDate();
+    const prevDim=new Date(yr,m,0).getDate();
+
+    let cells='';
+    // Prev month fillers
+    for(let i=first-1;i>=0;i--)
+      cells+=`<div class="day-cell other"><div class="day-num" style="opacity:.3">${prevDim-i}</div></div>`;
+
+    for(let d=1;d<=dim;d++){
+      const ds=`${yr}-${pad(m+1)}-${pad(d)}`;
+      const isT=ds===today;
+      const scheduled=filteredClasses.filter(c=>(c.schedule||[]).includes(ds));
+      const chips=scheduled.map(c=>
+        `<div class="chip" style="background:${c.color}20;color:${c.color}">${c.name}</div>`
+      ).join('');
+      cells+=`<div class="day-cell${isT?' is-today':''}">
+        <div class="day-num">${d}</div>${chips}
+      </div>`;
+    }
+
+    const total=first+dim;
+    const rem=total%7===0?0:7-total%7;
+    for(let i=1;i<=rem;i++)
+      cells+=`<div class="day-cell other"><div class="day-num" style="opacity:.3">${i}</div></div>`;
+
+    html+=`<div class="month-block">
+      <div class="month-title">${yr} 年 ${m+1} 月</div>
+      <div class="day-heads">${['日','一','二','三','四','五','六'].map(d=>`<div class="day-head">${d}</div>`).join('')}</div>
+      <div class="days-grid">${cells}</div>
     </div>`;
-  }
-  const total=first+dim;
-  const rem=total%7===0?0:7-total%7;
-  for(let i=1;i<=rem;i++)
-    html+=`<div class="cal-cell other"><div class="cal-dn" style="opacity:.25">${i}</div></div>`;
-  document.getElementById('cal-grid').innerHTML=html;
+  });
+
+  html+='</div>';
+  container.innerHTML=html;
 }
 
-function renderClassList(){
-  const today=todayStr();
-  document.getElementById('class-list').innerHTML=classes.map(c=>{
-    const sched=(c.schedule||[]).sort();
-    const upcoming=sched.filter(d=>d>=today).slice(0,8);
-    const tags=upcoming.length
-      ? upcoming.map(d=>{
-          const isT=d===today;
-          return`<span class="date-tag${isT?' today-tag':''}" style="background:${c.color}12;color:${c.color};border-color:${c.color}30${isT?`;border-color:${c.color}`:''}">${fmtShort(d)}${isT?' 今日':''}</span>`;
-        }).join('')
-      : `<span style="font-size:13px;color:var(--text3)">近期無排定課程</span>`;
-    return`<div class="class-card" style="border-left-color:${c.color}">
-      <div class="class-name">${c.name}</div>
-      <div class="class-meta">${[c.subj,c.time,c.loc].filter(Boolean).join('  ·  ')||'—'}</div>
-      <div class="upcoming-label">近期上課日（最近 8 堂）</div>
-      <div class="date-tags">${tags}</div>
+// Export modal
+function buildMonthOptions(){
+  const months=getSelectedYearMonths();
+  return months.map(({y,m},i)=>`<option value="${i}">${y}年${m+1}月</option>`).join('');
+}
+function openExportModal(){
+  const opts=buildMonthOptions();
+  document.getElementById('exp-start').innerHTML=opts;
+  document.getElementById('exp-end').innerHTML=opts;
+  // Default: first 4 months
+  document.getElementById('exp-start').value=0;
+  document.getElementById('exp-end').value=Math.min(3, getSelectedYearMonths().length-1);
+  document.getElementById('mo-export').classList.add('open');
+}
+function closeM(){document.getElementById('mo-export').classList.remove('open');}
+
+async function doExport(){
+  closeM();
+  const months=getSelectedYearMonths();
+  const s=+document.getElementById('exp-start').value;
+  const e=+document.getElementById('exp-end').value;
+  if(s>e){alert('起始月份不能晚於結束月份');return;}
+  const selected=months.slice(s,e+1);
+  const filtered=getFilteredClasses();
+
+  // Build export HTML
+  const cols=Math.min(selected.length,2); // 2 columns for export
+  const area=document.getElementById('export-area');
+
+  let inner=`
+    <div style="padding:32px 28px;background:#fff;width:${cols===2?820:420}px">
+      <div style="text-align:center;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid #e0ddd6">
+        <div style="font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;letter-spacing:3px;color:#1a1a1a">環流創作課程時間表</div>
+        <div style="font-size:11px;color:#999;margin-top:6px;letter-spacing:1px">
+          ${selected[0].y}年${selected[0].m+1}月 – ${selected[selected.length-1].y}年${selected[selected.length-1].m+1}月
+          ${filtered.length<classes.length?' ·  '+filtered.map(c=>c.name).join('、'):''}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:14px">`;
+
+  selected.forEach(({y:yr,m})=>{
+    const first=new Date(yr,m,1).getDay();
+    const dim=new Date(yr,m+1,0).getDate();
+    const prevDim=new Date(yr,m,0).getDate();
+    let cells='';
+    for(let i=first-1;i>=0;i--)
+      cells+=`<div style="background:#f8f8f6;min-height:34px;padding:3px 2px;display:flex;flex-direction:column;gap:2px"><div style="font-size:10px;color:#ccc;width:17px;height:17px;display:flex;align-items:center;justify-content:center;">${prevDim-i}</div></div>`;
+    for(let d=1;d<=dim;d++){
+      const ds=`${yr}-${pad(m+1)}-${pad(d)}`;
+      const sc=filtered.filter(c=>(c.schedule||[]).includes(ds));
+      const chips=sc.map(c=>`<div style="border-radius:3px;padding:1px 4px;font-size:8px;font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.6;background:${c.color}20;color:${c.color}">${c.name}</div>`).join('');
+      cells+=`<div style="background:#fff;min-height:34px;padding:3px 2px;display:flex;flex-direction:column;gap:2px"><div style="font-size:10px;color:#999;width:17px;height:17px;display:flex;align-items:center;justify-content:center;">${d}</div>${chips}</div>`;
+    }
+    const total=first+dim;
+    const rem2=total%7===0?0:7-total%7;
+    for(let i=1;i<=rem2;i++)
+      cells+=`<div style="background:#f8f8f6;min-height:34px;padding:3px 2px;display:flex;flex-direction:column;gap:2px"><div style="font-size:10px;color:#ccc;width:17px;height:17px;display:flex;align-items:center;justify-content:center;">${i}</div></div>`;
+
+    inner+=`<div style="border:1px solid #e0ddd6;border-radius:8px;overflow:hidden">
+      <div style="font-family:'Noto Serif TC',serif;font-size:12px;font-weight:600;text-align:center;padding:8px 4px;background:#f0f0ec;border-bottom:1px solid #e0ddd6;letter-spacing:1px">${yr} 年 ${m+1} 月</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);background:#f8f8f6;border-bottom:1px solid #e0ddd6">
+        ${['日','一','二','三','四','五','六'].map(d=>`<div style="text-align:center;padding:4px 2px;font-size:9px;font-weight:600;color:#999">${d}</div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#e0ddd6">${cells}</div>
     </div>`;
-  }).join('')||'<p style="color:var(--text3);font-size:14px">目前無班級資料</p>';
+  });
+
+  // Legend
+  inner+=`</div><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid #e0ddd6">
+    ${filtered.map(c=>`<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#555"><div style="width:8px;height:8px;border-radius:50%;background:${c.color}"></div>${c.name}</div>`).join('')}
+    <span style="margin-left:auto;font-size:10px;color:#bbb">環流創作</span>
+  </div></div>`;
+
+  area.innerHTML=inner;
+
+  // Use html2canvas to export
+  if(typeof html2canvas==='undefined'){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload=()=>captureAndDownload(area, selected);
+    document.head.appendChild(s);
+  }else{
+    captureAndDownload(area, selected);
+  }
+}
+
+async function captureAndDownload(area, selected){
+  area.style.left='0';
+  area.style.top='0';
+  try{
+    const canvas=await html2canvas(area,{
+      scale:2, useCORS:true, backgroundColor:'#ffffff',
+      logging:false
+    });
+    const a=document.createElement('a');
+    a.download=`課程時間表_${selected[0].y}${pad(selected[0].m+1)}-${selected[selected.length-1].y}${pad(selected[selected.length-1].m+1)}.png`;
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+  }catch(err){
+    alert('圖片產生失敗，請再試一次');
+  }
+  area.style.left='-9999px';
 }
 
 loadData();
