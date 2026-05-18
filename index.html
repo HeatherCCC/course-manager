@@ -357,9 +357,20 @@ select option{background:var(--surface2);}
     <button class="btn bp" onclick="openAddPay()">＋ 新增繳費</button>
   </div>
   <div class="card" style="padding:0">
-    <table><thead><tr><th>日期</th><th>學生</th><th>班級</th><th>方案</th><th>金額</th><th>購入堂數</th><th>備註</th></tr></thead>
+    <table><thead><tr><th>日期</th><th>學生</th><th>班級</th><th>方案</th><th>金額</th><th>購入堂數</th><th>備註</th><th>繳費單</th></tr></thead>
     <tbody id="pay-tbody"></tbody></table>
     <div id="pay-empty" class="empty-state" style="display:none"><div class="ei">💰</div><p>尚無繳費記錄</p></div>
+  </div>
+  <!-- Quick invoice section -->
+  <div class="card" style="margin-top:4px">
+    <div style="font-weight:600;font-size:14px;margin-bottom:14px">📄 快速產生繳費單</div>
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <label style="font-size:12px;color:var(--text2);font-weight:500">選擇學生</label>
+        <select id="inv-stu" style="width:160px" onchange="prefillInvoice()"></select>
+      </div>
+      <button class="btn bp" onclick="openInvoice()">產生繳費單</button>
+    </div>
   </div>
 </div>
 
@@ -388,6 +399,59 @@ select option{background:var(--surface2);}
 
 </div><!-- .main -->
 </div><!-- .app -->
+
+<!-- ===== MODAL: INVOICE ===== -->
+<div class="mo" id="mo-invoice">
+<div class="modal wide">
+  <div class="mhd"><h3>繳費單</h3><button class="mclose" onclick="closeM('mo-invoice')">×</button></div>
+  <div class="fg" style="margin-bottom:16px">
+    <!-- Row 1: auto-filled readonly info -->
+    <div class="fi"><label>學生姓名</label><input type="text" id="inv-name" readonly style="color:var(--text2)"></div>
+    <div class="fi"><label>班級</label><input type="text" id="inv-class" readonly style="color:var(--text2)"></div>
+    <!-- Row 2: invoice fields -->
+    <div class="fi"><label>開立日期</label><input type="date" id="inv-issue-date" oninput="updateInvPreview()"></div>
+    <div class="fi"><label>方案名稱</label><input type="text" id="inv-plan" placeholder="例：10堂套票" oninput="updateInvPreview()"></div>
+    <div class="fi"><label>購入堂數</label><input type="number" id="inv-sess" placeholder="10" oninput="updateInvPreview()"></div>
+    <div class="fi"><label>金額（元）</label><input type="number" id="inv-amt" placeholder="5000" oninput="updateInvPreview()"></div>
+    <!-- Row 3: payment status -->
+    <div class="fi full">
+      <label>是否繳費</label>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text);cursor:pointer;font-weight:400">
+          <input type="radio" name="inv-paid" id="inv-paid-yes" value="yes" onchange="togglePaidDate()" style="width:auto;accent-color:var(--accent)"> 是
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text);cursor:pointer;font-weight:400">
+          <input type="radio" name="inv-paid" id="inv-paid-no" value="no" onchange="togglePaidDate()" checked style="width:auto;accent-color:var(--accent)"> 否
+        </label>
+        <div id="paid-date-wrap" style="display:none;align-items:center;gap:8px;margin-left:8px">
+          <span style="font-size:12px;color:var(--text2)">繳費日期</span>
+          <input type="date" id="inv-paid-date" style="width:160px" oninput="updateInvPreview()">
+        </div>
+      </div>
+    </div>
+    <div class="fi full"><label>備註</label><input type="text" id="inv-note" placeholder="例：下期課程費用" oninput="updateInvPreview()"></div>
+  </div>
+  <!-- Preview -->
+  <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px">
+    <div style="background:var(--surface2);padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">預覽</div>
+    <div id="inv-preview" style="padding:0"></div>
+  </div>
+  <div class="mft">
+    <button class="btn bg-btn" onclick="closeM('mo-invoice')">取消</button>
+    <button class="btn bg-btn" onclick="printInvoice()" style="display:flex;align-items:center;gap:5px">列印 / 存 PDF</button>
+    <button class="btn bp" onclick="saveInvoiceAndPay()">確認並儲存</button>
+  </div>
+</div>
+</div>
+
+<!-- Invoice print area (hidden, for print only) -->
+<div id="inv-print-area" style="display:none"></div>
+<style>
+@media print {
+  body > *:not(#inv-print-area) { display: none !important; }
+  #inv-print-area { display: block !important; }
+}
+</style>
 
 <!-- ===== MODAL: CLASS ===== -->
 <div class="mo" id="mo-class">
@@ -1119,6 +1183,7 @@ function delStu(id){
 // PAYMENTS
 // ============================================================
 function renderPays(){
+  populateInvSelect();
   const tbody=document.getElementById('pay-tbody'),empty=document.getElementById('pay-empty');
   const list=[...S.pays].reverse();
   tbody.innerHTML='';
@@ -1135,6 +1200,7 @@ function renderPays(){
       <td style="font-family:'DM Mono',monospace;color:var(--accent3)">$${(p.amt||0).toLocaleString()}</td>
       <td style="font-family:'DM Mono',monospace">${p.sess||'—'} 堂</td>
       <td style="font-size:12px;color:var(--text3)">${p.note||''}</td>
+      <td><button class="btn bg-btn sm" onclick="openInvoiceFromPay(${p.id})">🖨️ 繳費單</button></td>
     </tr>`;
   });
 }
@@ -1262,6 +1328,158 @@ async function init(){
 }
 // Only auto-init if already authenticated this session
 if(sessionStorage.getItem('cms_auth')==='1') init();
+
+// ============================================================
+// INVOICE
+// ============================================================
+function populateInvSelect(){
+  const sel=document.getElementById('inv-stu');
+  if(!sel)return;
+  sel.innerHTML='<option value="">— 選擇學生 —</option>'+S.students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+function prefillInvoice(){
+  updateInvPreview();
+}
+function togglePaidDate(){
+  const isPaid=document.getElementById('inv-paid-yes').checked;
+  const wrap=document.getElementById('paid-date-wrap');
+  wrap.style.display=isPaid?'flex':'none';
+  if(isPaid&&!document.getElementById('inv-paid-date').value)
+    document.getElementById('inv-paid-date').value=todayStr();
+  updateInvPreview();
+}
+function openInvoice(){
+  const sid=+document.getElementById('inv-stu').value;
+  if(!sid){alert('請先選擇學生');return;}
+  const s=S.students.find(x=>x.id===sid);
+  const c=S.classes.find(x=>x.id===s.classId);
+  const price=s.price||(c?.price||0);
+  const lastPay=[...S.pays].filter(p=>p.sid===sid).pop();
+  document.getElementById('inv-name').value=s.name;
+  document.getElementById('inv-class').value=c?.name||'—';
+  document.getElementById('inv-issue-date').value=todayStr();
+  document.getElementById('inv-plan').value=lastPay?.plan||'套票費用';
+  document.getElementById('inv-sess').value=lastPay?.sess||10;
+  document.getElementById('inv-amt').value=lastPay?.amt||(price*10)||0;
+  document.getElementById('inv-note').value='';
+  document.getElementById('inv-paid-no').checked=true;
+  document.getElementById('paid-date-wrap').style.display='none';
+  document.getElementById('inv-paid-date').value='';
+  updateInvPreview();
+  openM('mo-invoice');
+}
+function updateInvPreview(){
+  const name=document.getElementById('inv-name')?.value||'';
+  const cls=document.getElementById('inv-class')?.value||'';
+  const issueDate=document.getElementById('inv-issue-date')?.value||'';
+  const plan=document.getElementById('inv-plan')?.value||'';
+  const sess=document.getElementById('inv-sess')?.value||'';
+  const amt=document.getElementById('inv-amt')?.value||'';
+  const note=document.getElementById('inv-note')?.value||'';
+  const isPaid=document.getElementById('inv-paid-yes')?.checked;
+  const paidDate=document.getElementById('inv-paid-date')?.value||'';
+  const html=buildInvoiceHtml({name,cls,issueDate,plan,sess,amt,note,isPaid,paidDate});
+  const prev=document.getElementById('inv-preview');
+  if(prev)prev.innerHTML=html;
+}
+function buildInvoiceHtml({name,cls,issueDate,plan,sess,amt,note,isPaid,paidDate}){
+  const paidBadge=isPaid
+    ? `<span style="display:inline-flex;align-items:center;gap:5px;background:#e8f8f0;color:#1a7a4a;border:1px solid #a8dfc0;border-radius:5px;padding:3px 10px;font-size:12px;font-weight:600">已繳費　${fmtD(paidDate)}</span>`
+    : `<span style="display:inline-flex;align-items:center;gap:5px;background:#fff4e5;color:#b45309;border:1px solid #f9d49a;border-radius:5px;padding:3px 10px;font-size:12px;font-weight:600">未繳費</span>`;
+  return `<div style="padding:28px 32px;font-family:'Noto Sans TC',sans-serif;color:#1a1a1a;background:#fff;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;padding-bottom:16px;border-bottom:2px solid #4a3fbf">
+      <div>
+        <div style="font-size:20px;font-weight:700;color:#4a3fbf;letter-spacing:1px">課程繳費單</div>
+        <div style="font-size:12px;color:#999;margin-top:5px">開立日期：${fmtD(issueDate)||'—'}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:16px;font-weight:700;color:#1a1a1a">${name}</div>
+        <div style="font-size:13px;color:#666;margin-top:3px">${cls}</div>
+        <div style="margin-top:8px">${paidBadge}</div>
+      </div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+      <thead>
+        <tr style="background:#f5f4ff">
+          <th style="text-align:left;padding:10px 14px;font-size:12px;color:#666;font-weight:600;border-bottom:1px solid #e0e0f0">項目</th>
+          <th style="text-align:center;padding:10px 14px;font-size:12px;color:#666;font-weight:600;border-bottom:1px solid #e0e0f0">堂數</th>
+          <th style="text-align:right;padding:10px 14px;font-size:12px;color:#666;font-weight:600;border-bottom:1px solid #e0e0f0">金額</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:12px 14px;font-size:14px;border-bottom:1px solid #f0f0f0">${plan||'套票費用'}</td>
+          <td style="padding:12px 14px;font-size:14px;text-align:center;border-bottom:1px solid #f0f0f0">${sess} 堂</td>
+          <td style="padding:12px 14px;font-size:14px;text-align:right;font-weight:600;border-bottom:1px solid #f0f0f0">NT$ ${Number(amt||0).toLocaleString()}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:${note?'16px':'20px'}">
+      <div style="background:#f5f4ff;border-radius:8px;padding:14px 20px;text-align:right">
+        <div style="font-size:12px;color:#888;margin-bottom:4px">應繳金額</div>
+        <div style="font-size:24px;font-weight:700;color:#4a3fbf">NT$ ${Number(amt||0).toLocaleString()}</div>
+      </div>
+    </div>
+    ${note?`<div style="background:#fff8f0;border-left:3px solid #faac6d;padding:10px 14px;border-radius:4px;font-size:13px;color:#666;margin-bottom:16px">備註：${note}</div>`:''}
+    <div style="display:flex;justify-content:space-between;padding-top:14px;border-top:1px solid #eee;font-size:12px;color:#aaa">
+      <span>如有疑問請直接與老師聯繫</span>
+      <span>簽收：_______________</span>
+    </div>
+  </div>`;
+}
+function printInvoice(){
+  const name=document.getElementById('inv-name').value;
+  const cls=document.getElementById('inv-class').value;
+  const issueDate=document.getElementById('inv-issue-date').value;
+  const plan=document.getElementById('inv-plan').value;
+  const sess=document.getElementById('inv-sess').value;
+  const amt=document.getElementById('inv-amt').value;
+  const note=document.getElementById('inv-note').value;
+  const isPaid=document.getElementById('inv-paid-yes').checked;
+  const paidDate=document.getElementById('inv-paid-date').value;
+  const area=document.getElementById('inv-print-area');
+  area.innerHTML=`<style>@page{margin:20mm;}body{margin:0;}</style>`
+    +buildInvoiceHtml({name,cls,issueDate,plan,sess,amt,note,isPaid,paidDate});
+  window.print();
+}
+function saveInvoiceAndPay(){
+  const sid=+document.getElementById('inv-stu').value;
+  if(!sid)return;
+  const sess=+document.getElementById('inv-sess').value||0;
+  const isPaid=document.getElementById('inv-paid-yes').checked;
+  const paidDate=document.getElementById('inv-paid-date').value;
+  const p={
+    id:S.nid++, sid,
+    date:isPaid?(paidDate||todayStr()):document.getElementById('inv-issue-date').value,
+    plan:document.getElementById('inv-plan').value,
+    amt:+document.getElementById('inv-amt').value||0,
+    sess,
+    note:document.getElementById('inv-note').value+(isPaid?'':' ［未繳費］')
+  };
+  S.pays.push(p);
+  if(sess&&isPaid){const s=S.students.find(x=>x.id===sid);if(s)s.package=(s.package||0)+sess;}
+  save();closeM('mo-invoice');renderPays();
+  alert(`已儲存 ${document.getElementById('inv-name').value} 的繳費記錄`);
+}
+function openInvoiceFromPay(pid){
+  const p=S.pays.find(x=>x.id===pid);if(!p)return;
+  const s=S.students.find(x=>x.id===p.sid);
+  const c=S.classes.find(x=>x.id===s?.classId);
+  document.getElementById('inv-stu').value=p.sid;
+  document.getElementById('inv-name').value=s?.name||'';
+  document.getElementById('inv-class').value=c?.name||'—';
+  document.getElementById('inv-issue-date').value=p.date||todayStr();
+  document.getElementById('inv-plan').value=p.plan||'';
+  document.getElementById('inv-sess').value=p.sess||'';
+  document.getElementById('inv-amt').value=p.amt||'';
+  document.getElementById('inv-note').value=p.note||'';
+  // Default to paid since it's an existing record
+  document.getElementById('inv-paid-yes').checked=true;
+  document.getElementById('paid-date-wrap').style.display='flex';
+  document.getElementById('inv-paid-date').value=p.date||todayStr();
+  updateInvPreview();
+  openM('mo-invoice');
+}
 
 // ============================================================
 // EXPORT TO EXCEL (SheetJS)

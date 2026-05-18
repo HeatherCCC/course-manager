@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>環流創作課程時間表</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff;--surface:#f8f8f6;--surface2:#f0f0ec;--border:#e0ddd6;
+  --accent:#4a3fbf;--text:#1a1a1a;--text2:#555550;--text3:#999990;
+  --warn:#c47a00;--r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;min-height:100vh;line-height:1.6;}
+.wrap{max-width:800px;margin:0 auto;padding:48px 24px 72px;}
+
+/* Header */
+.header{text-align:center;margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border);}
+.header h1{font-family:'Noto Serif TC',serif;font-size:28px;font-weight:700;color:var(--text);letter-spacing:2px;line-height:1.4;}
+.header p{font-size:13px;color:var(--text3);margin-top:10px;letter-spacing:1px;}
+
+/* Month nav */
+.cal-nav{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:20px;}
+.cal-nav button{background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:6px 16px;cursor:pointer;font-size:16px;font-family:inherit;transition:all .12s;}
+.cal-nav button:hover{background:var(--surface);border-color:var(--accent);color:var(--accent);}
+.cal-nav .mlabel{font-family:'Noto Serif TC',serif;font-size:18px;font-weight:600;min-width:130px;text-align:center;color:var(--text);}
+
+/* Calendar */
+.cal-outer{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:36px;}
+.cal-heads{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface2);border-bottom:1px solid var(--border);}
+.cal-head{text-align:center;padding:10px 4px;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.8px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);}
+.cal-cell{background:var(--bg);min-height:84px;padding:8px;display:flex;flex-direction:column;gap:3px;}
+.cal-cell.other{background:var(--surface);}
+.cal-cell.today{background:#f0eeff;}
+.cal-dn{font-size:12px;font-weight:500;color:var(--text3);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:5px;margin-bottom:2px;}
+.cal-cell.today .cal-dn{color:var(--accent);background:rgba(74,63,191,.12);font-weight:700;}
+.chip{display:flex;align-items:center;gap:4px;padding:3px 7px;border-radius:4px;font-size:11px;font-weight:500;overflow:hidden;}
+.chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.chip-time{font-size:10px;opacity:.65;flex-shrink:0;}
+
+/* Section */
+.section-title{font-family:'Noto Serif TC',serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);letter-spacing:1px;}
+
+/* Class card */
+.class-card{border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:14px;border-left:3px solid;background:var(--bg);}
+.class-name{font-family:'Noto Serif TC',serif;font-size:18px;font-weight:700;margin-bottom:5px;color:var(--text);}
+.class-meta{font-size:13px;color:var(--text3);margin-bottom:16px;letter-spacing:.5px;}
+.upcoming-label{font-size:11px;color:var(--text3);letter-spacing:.8px;margin-bottom:9px;text-transform:uppercase;}
+.date-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.date-tag{padding:4px 11px;border-radius:5px;font-size:12px;font-family:'DM Mono',monospace;border:1px solid transparent;}
+.date-tag.today-tag{font-weight:700;border-style:solid;}
+
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.leg{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);}
+.dot{width:8px;height:8px;border-radius:50%;}
+
+/* Loading */
+.loading{text-align:center;padding:60px 20px;color:var(--text3);}
+.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Footer */
+.footer{text-align:center;margin-top:48px;padding-top:24px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);letter-spacing:.5px;}
+
+@media(max-width:500px){
+  .header h1{font-size:22px;}
+  .cal-cell{min-height:60px;padding:4px;}
+  .chip{padding:2px 5px;font-size:10px;}
+  .chip-time{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>環流創作課程時間表</h1>
+    <p>以下為各班級最新課程安排</p>
+  </div>
+
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <p>載入課表中</p>
+  </div>
+
+  <div id="content" style="display:none">
+    <div class="cal-nav">
+      <button onclick="calStep(-1)">&#8249;</button>
+      <span class="mlabel" id="cal-label"></span>
+      <button onclick="calStep(1)">&#8250;</button>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="cal-outer">
+      <div class="cal-heads" id="cal-heads"></div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+    <div class="section-title">各班級課表</div>
+    <div id="class-list"></div>
+  </div>
+
+  <div class="footer">如有任何疑問，請直接與老師聯繫</div>
+</div>
+
+<script>
+const GS_URL = 'https://script.google.com/macros/s/AKfycbxPVGtrop_WXDxpUjVzZ1A8DSA9EIM0Vbf67Czs5FQKd2uaSqTwV9JgVDbHV_es4TVj/exec';
+let classes = [];
+const T = new Date();
+let calY = T.getFullYear(), calM = T.getMonth();
+
+function pad(n){return String(n).padStart(2,'0');}
+function todayStr(){return `${T.getFullYear()}-${pad(T.getMonth()+1)}-${pad(T.getDate())}`;}
+function fmtShort(d){
+  if(!d)return'';
+  const dt=new Date(d+'T00:00:00');
+  return`${pad(dt.getMonth()+1)}/${pad(dt.getDate())}`;
+}
+
+async function loadData(){
+  try{
+    const r=await fetch(GS_URL+'?action=read');
+    const j=await r.json();
+    classes=(j.classes||[]).map(c=>({
+      ...c, id:+c.id, price:+c.price||0,
+      schedule:c.schedule?String(c.schedule).split(',').filter(Boolean):[]
+    }));
+  }catch(e){
+    document.getElementById('loading').innerHTML='<p style="color:#c00">無法載入課表，請稍後再試</p>';
+    return;
+  }
+  document.getElementById('loading').style.display='none';
+  document.getElementById('content').style.display='block';
+  renderAll();
+}
+
+function calStep(d){
+  calM+=d;
+  if(calM>11){calM=0;calY++;}
+  if(calM<0){calM=11;calY--;}
+  renderCalendar();
+}
+
+function renderAll(){
+  renderLegend();
+  renderCalendar();
+  renderClassList();
+}
+
+function renderLegend(){
+  document.getElementById('legend').innerHTML=classes.map(c=>
+    `<div class="leg"><div class="dot" style="background:${c.color}"></div>${c.name}</div>`
+  ).join('');
+}
+
+function renderCalendar(){
+  document.getElementById('cal-label').textContent=`${calY} 年 ${calM+1} 月`;
+  document.getElementById('cal-heads').innerHTML=
+    ['日','一','二','三','四','五','六'].map(d=>`<div class="cal-head">${d}</div>`).join('');
+  const first=new Date(calY,calM,1).getDay();
+  const dim=new Date(calY,calM+1,0).getDate();
+  const prev=new Date(calY,calM,0).getDate();
+  let html='';
+  for(let i=first-1;i>=0;i--)
+    html+=`<div class="cal-cell other"><div class="cal-dn" style="opacity:.25">${prev-i}</div></div>`;
+  for(let d=1;d<=dim;d++){
+    const ds=`${calY}-${pad(calM+1)}-${pad(d)}`;
+    const isT=ds===todayStr();
+    const scheduled=classes.filter(c=>(c.schedule||[]).includes(ds));
+    const chips=scheduled.map(c=>
+      `<div class="chip" style="background:${c.color}18;color:${c.color}">
+        <span class="chip-name">${c.name}</span>
+        ${c.time?`<span class="chip-time">${c.time}</span>`:''}
+      </div>`
+    ).join('');
+    html+=`<div class="cal-cell${isT?' today':''}">
+      <div class="cal-dn">${d}</div>${chips}
+    </div>`;
+  }
+  const total=first+dim;
+  const rem=total%7===0?0:7-total%7;
+  for(let i=1;i<=rem;i++)
+    html+=`<div class="cal-cell other"><div class="cal-dn" style="opacity:.25">${i}</div></div>`;
+  document.getElementById('cal-grid').innerHTML=html;
+}
+
+function renderClassList(){
+  const today=todayStr();
+  document.getElementById('class-list').innerHTML=classes.map(c=>{
+    const sched=(c.schedule||[]).sort();
+    const upcoming=sched.filter(d=>d>=today).slice(0,8);
+    const tags=upcoming.length
+      ? upcoming.map(d=>{
+          const isT=d===today;
+          return`<span class="date-tag${isT?' today-tag':''}" style="background:${c.color}12;color:${c.color};border-color:${c.color}30${isT?`;border-color:${c.color}`:''}">${fmtShort(d)}${isT?' 今日':''}</span>`;
+        }).join('')
+      : `<span style="font-size:13px;color:var(--text3)">近期無排定課程</span>`;
+    return`<div class="class-card" style="border-left-color:${c.color}">
+      <div class="class-name">${c.name}</div>
+      <div class="class-meta">${[c.subj,c.time,c.loc].filter(Boolean).join('  ·  ')||'—'}</div>
+      <div class="upcoming-label">近期上課日（最近 8 堂）</div>
+      <div class="date-tags">${tags}</div>
+    </div>`;
+  }).join('')||'<p style="color:var(--text3);font-size:14px">目前無班級資料</p>';
+}
+
+loadData();
+</script>
+</body>
+</html>
